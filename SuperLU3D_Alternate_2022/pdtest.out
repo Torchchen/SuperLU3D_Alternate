@@ -1,0 +1,131 @@
+Double-precision testing output
+
+== sparse matrix:
+
+**-- nrhs = 1, process grid = 1 X 1, fill 2, relax 4, max-super 10
+
+**-- nrhs = 1, process grid = 1 X 1, fill 2, relax 4, max-super 20
+
+**-- nrhs = 1, process grid = 1 X 1, fill 2, relax 8, max-super 10
+
+**-- nrhs = 1, process grid = 1 X 1, fill 2, relax 8, max-super 20
+
+**-- nrhs = 1, process grid = 1 X 1, fill 6, relax 4, max-super 10
+
+**-- nrhs = 1, process grid = 1 X 1, fill 6, relax 4, max-super 20
+
+**-- nrhs = 1, process grid = 1 X 1, fill 6, relax 8, max-super 10
+
+**-- nrhs = 1, process grid = 1 X 1, fill 6, relax 8, max-super 20
+
+**-- nrhs = 1, process grid = 1 X 3, fill 2, relax 4, max-super 10
+
+**-- nrhs = 1, process grid = 1 X 3, fill 2, relax 4, max-super 20
+
+**-- nrhs = 1, process grid = 1 X 3, fill 2, relax 8, max-super 10
+
+**-- nrhs = 1, process grid = 1 X 3, fill 2, relax 8, max-super 20
+
+**-- nrhs = 1, process grid = 1 X 3, fill 6, relax 4, max-super 10
+
+**-- nrhs = 1, process grid = 1 X 3, fill 6, relax 4, max-super 20
+
+**-- nrhs = 1, process grid = 1 X 3, fill 6, relax 8, max-super 10
+
+**-- nrhs = 1, process grid = 1 X 3, fill 6, relax 8, max-super 20
+
+**-- nrhs = 1, process grid = 2 X 1, fill 2, relax 4, max-super 10
+
+**-- nrhs = 1, process grid = 2 X 1, fill 2, relax 4, max-super 20
+
+**-- nrhs = 1, process grid = 2 X 1, fill 2, relax 8, max-super 10
+
+**-- nrhs = 1, process grid = 2 X 1, fill 2, relax 8, max-super 20
+
+**-- nrhs = 1, process grid = 2 X 1, fill 6, relax 4, max-super 10
+
+**-- nrhs = 1, process grid = 2 X 1, fill 6, relax 4, max-super 20
+
+**-- nrhs = 1, process grid = 2 X 1, fill 6, relax 8, max-super 10
+
+**-- nrhs = 1, process grid = 2 X 1, fill 6, relax 8, max-super 20
+
+**-- nrhs = 1, process grid = 2 X 3, fill 2, relax 4, max-super 10
+
+**-- nrhs = 1, process grid = 2 X 3, fill 2, relax 4, max-super 20
+
+**-- nrhs = 1, process grid = 2 X 3, fill 2, relax 8, max-super 10
+
+**-- nrhs = 1, process grid = 2 X 3, fill 2, relax 8, max-super 20
+
+**-- nrhs = 1, process grid = 2 X 3, fill 6, relax 4, max-super 10
+
+**-- nrhs = 1, process grid = 2 X 3, fill 6, relax 4, max-super 20
+
+**-- nrhs = 1, process grid = 2 X 3, fill 6, relax 8, max-super 10
+
+**-- nrhs = 1, process grid = 2 X 3, fill 6, relax 8, max-super 20
+
+**-- nrhs = 3, process grid = 1 X 1, fill 2, relax 4, max-super 10
+
+**-- nrhs = 3, process grid = 1 X 1, fill 2, relax 4, max-super 20
+
+**-- nrhs = 3, process grid = 1 X 1, fill 2, relax 8, max-super 10
+
+**-- nrhs = 3, process grid = 1 X 1, fill 2, relax 8, max-super 20
+
+**-- nrhs = 3, process grid = 1 X 1, fill 6, relax 4, max-super 10
+
+**-- nrhs = 3, process grid = 1 X 1, fill 6, relax 4, max-super 20
+
+**-- nrhs = 3, process grid = 1 X 1, fill 6, relax 8, max-super 10
+
+**-- nrhs = 3, process grid = 1 X 1, fill 6, relax 8, max-super 20
+
+**-- nrhs = 3, process grid = 1 X 3, fill 2, relax 4, max-super 10
+
+**-- nrhs = 3, process grid = 1 X 3, fill 2, relax 4, max-super 20
+
+**-- nrhs = 3, process grid = 1 X 3, fill 2, relax 8, max-super 10
+
+**-- nrhs = 3, process grid = 1 X 3, fill 2, relax 8, max-super 20
+
+**-- nrhs = 3, process grid = 1 X 3, fill 6, relax 4, max-super 10
+
+**-- nrhs = 3, process grid = 1 X 3, fill 6, relax 4, max-super 20
+
+**-- nrhs = 3, process grid = 1 X 3, fill 6, relax 8, max-super 10
+
+**-- nrhs = 3, process grid = 1 X 3, fill 6, relax 8, max-super 20
+
+**-- nrhs = 3, process grid = 2 X 1, fill 2, relax 4, max-super 10
+
+**-- nrhs = 3, process grid = 2 X 1, fill 2, relax 4, max-super 20
+
+**-- nrhs = 3, process grid = 2 X 1, fill 2, relax 8, max-super 10
+
+**-- nrhs = 3, process grid = 2 X 1, fill 2, relax 8, max-super 20
+
+**-- nrhs = 3, process grid = 2 X 1, fill 6, relax 4, max-super 10
+
+**-- nrhs = 3, process grid = 2 X 1, fill 6, relax 4, max-super 20
+
+**-- nrhs = 3, process grid = 2 X 1, fill 6, relax 8, max-super 10
+
+**-- nrhs = 3, process grid = 2 X 1, fill 6, relax 8, max-super 20
+
+**-- nrhs = 3, process grid = 2 X 3, fill 2, relax 4, max-super 10
+
+**-- nrhs = 3, process grid = 2 X 3, fill 2, relax 4, max-super 20
+
+**-- nrhs = 3, process grid = 2 X 3, fill 2, relax 8, max-super 10
+
+**-- nrhs = 3, process grid = 2 X 3, fill 2, relax 8, max-super 20
+
+**-- nrhs = 3, process grid = 2 X 3, fill 6, relax 4, max-super 10
+
+**-- nrhs = 3, process grid = 2 X 3, fill 6, relax 4, max-super 20
+
+**-- nrhs = 3, process grid = 2 X 3, fill 6, relax 8, max-super 10
+
+**-- nrhs = 3, process grid = 2 X 3, fill 6, relax 8, max-super 20

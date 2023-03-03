@@ -1,0 +1,12 @@
+prefix=/home/412-23/software/superlu_dist-master/program/local
+libdir=/home/412-23/software/superlu_dist-master/program/lib64
+includedir=/home/412-23/software/superlu_dist-master/program/local//home/412-23/software/superlu_dist-master/program/include
+
+Name: SuperLU_DIST
+Description: Distributed-memory direct solution of sparse systems of linear equations
+Version: 7.0.0
+URL: https://portal.nersc.gov/project/sparse/superlu/
+
+Libs: -L${libdir} -lsuperlu_dist
+Libs.private: /public/software/compiler/intel/intel-compiler-2017.5.239/mkl/lib/intel64_lin/libmkl_gf_lp64.so;/public/software/compiler/intel/intel-compiler-2017.5.239/mkl/lib/intel64_lin/libmkl_gnu_thread.so;/public/software/compiler/intel/intel-compiler-2017.5.239/mkl/lib/intel64_lin/libmkl_core.so;/usr/local/lib64/libgomp.so;-lm;-ldl -lm
+Cflags: -I${includedir}
