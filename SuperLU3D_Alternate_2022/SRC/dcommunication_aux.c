@@ -837,9 +837,18 @@ int_t dPackLBlock(int_t k, double* Dest, Glu_persist_t *Glu_persist,
     if(GetVectorStatus(Llu->[lk][iPart]) == Unused){
         SetVectorStatus(Llu->isUsed_Lnzval_bc_ptr[lk][iPart], Used);
     }
-    #endif   
+    #endif
     
     #endif
+
+    #ifdef Use_harddisk    
+    
+    if(Llu->isSave){
+        Llu->Lnzval_bc_ptr[lk] = load_Lnzval_bc_ptr_harddisk(lk,Llu, Llu->save_iam);
+    }
+
+    #endif   
+
     double *lusup = Llu->Lnzval_bc_ptr[lk];
 
     int_t nsupc = SuperSize (k);
@@ -865,6 +874,14 @@ int_t dPackLBlock(int_t k, double* Dest, Glu_persist_t *Glu_persist,
         SetVectorStatus(Llu->isUsed_Lnzval_bc_ptr[lk][iPart], Unused);
     }
     #endif
+    #endif
+
+    #ifdef Use_harddisk
+    if(Llu->isSave && Llu->Lnzval_bc_ptr_ilen[lk]){
+        if(SUPERLU_FREE(lusup)){
+            ABORT("failed in dPackLBlock(). \n");
+        }        
+    }
     #endif
     
     return 0;
