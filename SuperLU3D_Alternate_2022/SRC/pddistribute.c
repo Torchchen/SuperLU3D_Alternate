@@ -413,10 +413,10 @@ pddistribute(fact_t fact, int_t n, SuperMatrix *A,
     int_t **isUsed_Unzval_br_ptr;
 	int_t *Lnzval_bc_ptr_ilen;
 	int_t *Unzval_br_ptr_ilen;
-	#ifdef SuperLargeScale
+	#ifdef Use_harddisk
 	fpos_t **Lnzval_bc_ptr_fileposition;    
     fpos_t **Unzval_br_ptr_fileposition;
-	#endif
+	#endif	
 
 	double **tmpdouble;
 
@@ -527,7 +527,8 @@ pddistribute(fact_t fact, int_t n, SuperMatrix *A,
 		       ".. Phase 1 - ReDistribute_A time: %.2f\t\n", t);
 #endif
 
-    if ( fact == SamePattern_SameRowPerm ) {
+
+    if ( fact == SamePattern_SameRowPerm ) {	
 
 #if ( PROFlevel>=1 )
 	t_l = t_u = 0; u_blks = 0;
@@ -664,7 +665,7 @@ pddistribute(fact_t fact, int_t n, SuperMatrix *A,
         /* ------------------------------------------------------------
 	   FIRST TIME CREATING THE L AND U DATA STRUCTURES.
 	   ------------------------------------------------------------*/
-
+	
 #if ( PROFlevel>=1 )
 	t_l = t_u = 0; u_blks = 0;
 #endif
@@ -711,7 +712,7 @@ pddistribute(fact_t fact, int_t n, SuperMatrix *A,
 	}
 	if ( !(Unzval_br_ptr_ilen =intCalloc_dist(k)) )
 		ABORT("Malloc fails for Unzval_br_ptr_ilen[].");
-	#ifdef SuperLargeScale
+	#ifdef Use_harddisk
 	
 	if ( !(Unzval_br_ptr_fileposition =
 		(fpos_t**)malloc(k * sizeof(fpos_t*))) )
@@ -719,13 +720,13 @@ pddistribute(fact_t fact, int_t n, SuperMatrix *A,
 	
 
 	#endif
-
+	
 	#ifdef SuperLargeScaleGPUBuffer
 	if ( !(Ufstnz_br_ptr_ilen =intCalloc_dist(k)) )
 		ABORT("Malloc fails for Ufstnz_br_ptr_ilen[].");
 	#endif
 	#endif
-
+	
 	if ( !(ToSendD = SUPERLU_MALLOC(k * sizeof(int))) )
 	    ABORT("Malloc fails for ToSendD[].");
 	for (i = 0; i < k; ++i) ToSendD[i] = NO;	
@@ -770,7 +771,6 @@ pddistribute(fact_t fact, int_t n, SuperMatrix *A,
 	   COUNT NUMBER OF ROW BLOCKS AND THE LENGTH OF EACH BLOCK IN U.
 	   THIS ACCOUNTS FOR ONE-PASS PROCESSING OF G(U).
 	   ------------------------------------------------------------*/
-
 	/* Loop through each supernode column. */
 	for (jb = 0; jb < nsupers; ++jb) {
 	    pc = PCOL( jb, grid );
@@ -809,6 +809,7 @@ pddistribute(fact_t fact, int_t n, SuperMatrix *A,
 	} /* for jb ... */
 
 	/* Set up the initial pointers for each block row in U. */
+	
 	nrbu = CEILING( nsupers, grid->nprow );/* Number of local block rows */
 	for (lb = 0; lb < nrbu; ++lb) {
 	    len = Urb_length[lb];
@@ -854,7 +855,7 @@ pddistribute(fact_t fact, int_t n, SuperMatrix *A,
 	    Urb_indptr[lb] = BR_HEADER; /* Skip header in U index[]. */
  	    Urb_fstnz[lb] = BR_HEADER;
 	} /* for lb ... */
-
+	
 	SUPERLU_FREE(Ucbs);
 
 	#if ( DEBUGlevel>=2 )
@@ -913,7 +914,7 @@ pddistribute(fact_t fact, int_t n, SuperMatrix *A,
 	}
 	if ( !(Lnzval_bc_ptr_ilen =intCalloc_dist(k)) )
 		ABORT("Malloc fails for Lnzval_bc_ptr_ilen[].");
-	#ifdef SuperLargeScale
+	#ifdef Use_harddisk
 	
 	
 	if ( !(Lnzval_bc_ptr_fileposition =
@@ -968,11 +969,9 @@ pddistribute(fact_t fact, int_t n, SuperMatrix *A,
 	    fsendx_plist[i] = &index[j];
 	if ( !(bsendx_plist = (int_t **) SUPERLU_MALLOC(k*sizeof(int_t*))) )
 	    ABORT("Malloc fails for bsendx_plist[].");
-	
-	#ifndef test_0124
 	if ( !(index = intMalloc_dist(len)) )
 	    ABORT("Malloc fails for bsendx_plist[0]");
-	#endif
+	
 	for (i = 0; i < len; ++i) index[i] = EMPTY;
 	for (i = 0, j = 0; i < k; ++i, j += grid->nprow)
 	    bsendx_plist[i] = &index[j];
@@ -1252,7 +1251,9 @@ pddistribute(fact_t fact, int_t n, SuperMatrix *A,
 			SUPERLU_FREE(index);
 
 			Lrowind_bc_ptr[ljb] = index_srt;
-			Lnzval_bc_ptr[ljb] = lusup_srt;			
+			Lnzval_bc_ptr[ljb] = lusup_srt;		
+
+			// SUPERLU_FREE(Lnzval_bc_ptr[ljb]);	
 
 			#ifdef test1220
 			tmpdouble[ljb]=doubleCalloc_dist(len*nsupc);
@@ -2131,7 +2132,7 @@ if ( !iam) printf(".. Construct Reduce tree for U: %.2f\t\n", t);
 	Llu->isUsed_Unzval_br_ptr=isUsed_Unzval_br_ptr;
 	Llu->Lnzval_bc_ptr_ilen=Lnzval_bc_ptr_ilen;
 	Llu->Unzval_br_ptr_ilen=Unzval_br_ptr_ilen;
-	#ifdef SuperLargeScale
+	#ifdef Use_harddisk
 	Llu->Lnzval_bc_ptr_fileposition=Lnzval_bc_ptr_fileposition;
 	Llu->Unzval_br_ptr_fileposition=Unzval_br_ptr_fileposition;
 	#endif

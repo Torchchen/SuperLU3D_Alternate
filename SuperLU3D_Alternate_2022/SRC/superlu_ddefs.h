@@ -106,6 +106,7 @@ at the top-level directory.
     // #define AllCPU
     // #define CPU_GPU
     #define AllGPU
+    #define Use_harddisk
     // #define Torch_0312
     #define NUMPART 1000
 
@@ -207,6 +208,8 @@ typedef struct {
     int_t **isUsed_Unzval_br_ptr;
     int_t *Lnzval_bc_ptr_ilen;
     int_t *Unzval_br_ptr_ilen;
+    int_t Lnzval_bc_ptr_sumlen;
+    int_t Unzval_br_ptr_sumlen;
     #ifdef SuperLargeScale
     fpos_t **Lnzval_bc_ptr_fileposition;
     
@@ -221,6 +224,18 @@ typedef struct {
     double **tmpdouble;
 
     int_t ncol; 
+    #endif
+
+    #ifdef Use_harddisk
+    double  *LnzvalVec;       /* A single vector */
+    int_t   *LnzvalPtr;       /* A single vector */
+    double  *UnzvalVec;       /* A single vector */
+    int_t   *UnzvalPtr;      /* A single vector */
+    // int_t l_ind_len = 0;
+	// int_t l_val_len = 0;
+    int isSave;
+    fpos_t **Lnzval_bc_ptr_fileposition;    
+    fpos_t **Unzval_br_ptr_fileposition;
     #endif
 
     #ifdef SuperLargeScaleGPU
@@ -245,6 +260,10 @@ typedef struct {
     int_t *Ufstnz_br_ptr_ilen;
     int isEmpty;
     int tempiam;
+    #endif
+
+    #ifdef Use_harddisk
+    int save_iam;
     #endif
 
     #endif
@@ -597,7 +616,7 @@ extern void load_idata_vector_txt(int_t *data,int_t n,int_t ntimestep,int_t inde
 extern void load_ddata_vector_txt(double *data,int_t n,int_t ntimestep,int_t index);
 extern void save_ddata_vector_txt(double *data,int_t n,int_t ntimestep,int_t index);
 extern void save_idata_vector_txt(int_t *data,int_t n,int_t ntimestep,int_t index);
-extern void save_idata_vector_binary(int_t *data,int_t n,int_t ntimestep,int_t index);
+extern void save_idata_vector_binary(int_t *data,int_t n,int_t ntimestep,int index);
 extern void load_ddata_markders_vector_binary(double *data,int_t n,int_t ntimestep,int_t index);
 extern void load_idata_markders_vector_binary(int_t *data,int_t n,int_t ntimestep,int_t index);
 extern void load_idata_vector_binary(int_t *data,int_t n,int_t ntimestep,int_t index);
@@ -606,6 +625,20 @@ extern void load_ddata_vector_binary(double *data,int_t n,int_t ntimestep,int_t 
 extern void delete_idata_vector_txt(int_t ntimestep,int_t index);
 extern int isexist_idata_vector_txt(int_t ntimestep,int_t index);
 extern void save_ddata_vector_binary(double *data,int_t n,int_t ntimestep,int_t index);
+
+#ifdef Use_harddisk
+void save_LUstruct_harddisk(int_t n, gridinfo3d_t *grid3d, dLUstruct_t *LUstruct);
+void save_LUstruct_harddisk2(int_t n, gridinfo3d_t *grid3d, dLUstruct_t *LUstruct, int_t nsupers);
+int load_LUstruct_harddisk(int_t n, gridinfo3d_t *grid3d, dLUstruct_t *LUstruct);
+double* load_Lnzval_bc_ptr_harddisk(int_t ljb, dLocalLU_t *Llu, int iam);
+double* load_Unzval_br_ptr_harddisk(int_t lb, dLocalLU_t *Llu, int iam);
+int set_iLnzval_bc_ptr_harddisk(double *lsub, int_t ljb, int_t begin, int_t len, dLocalLU_t *Llu, int iam);
+int set_iUnzval_br_ptr_harddisk(double *uval, int_t lb, int_t begin, int_t len, dLocalLU_t *Llu, int iam);
+extern void dDestroy_LU1(int_t n, gridinfo_t *grid, dLUstruct_t *LUstruct);
+void dBcastRecv_LUstruct1_harddisk(dLUstruct_t *LUstruct, int sendrank, int recrank, gridinfo3d_t *grid3d, int_t nsupers);
+void dBcastRecv_LUstruct_harddisk(dLUstruct_t *LUstruct, int sendrank, int recrank, gridinfo3d_t *grid3d, int_t nsupers);
+#endif
+
 
 extern void dscatter_l_SuperLargeScale (int ib, int ljb, int nsupc, int_t iukp, int_t* xsup,
 			int klst, int nbrow, int_t lptr, int temp_nbrow,

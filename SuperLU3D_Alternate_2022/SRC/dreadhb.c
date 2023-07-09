@@ -130,14 +130,14 @@ dreadhb_dist(int iam, FILE *fp, int_t *nrow, int_t *ncol, int_t *nonz,
     index=1007;
     ntimestep=0;
 
-    int slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
+    int slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
     slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
     slen=slen+(index==0?1:(int)log(index)+1);
     char *filename=(char*)malloc(slen+1);
     #if defined (_LONGINT)
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.txt\0",index,ntimestep);
     #else /* Default */
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.txt\0",index,ntimestep);
     #endif
     
     *nonz=0;
@@ -401,14 +401,14 @@ dreadhb_dist2(int iam, int_t *nrow, int_t *ncol, int_t *nonz,
     index=1007;
     #endif
 
-    int slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
+    int slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
     slen=slen+((*ntimestep)==0?1:(int)log(*ntimestep)+1);
     slen=slen+(index==0?1:(int)log(index)+1);
     char *filename=(char*)malloc(slen+1);
     #if defined (_LONGINT)
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld.txt\0",index,*ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.txt\0",index,*ntimestep);
     #else /* Default */
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d.txt\0",index,*ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.txt\0",index,*ntimestep);
     #endif
     
     *nonz=0;
@@ -438,7 +438,7 @@ dreadhb_dist2(int iam, int_t *nrow, int_t *ncol, int_t *nonz,
         #else
         #ifdef FILE_BINARY_MATLAB
         int_t *colptr_temp = intMalloc_dist(*nonz);
-        load_idata_vector_binary(colptr_temp,*nonz,*ntimestep,1001);
+        load_idata_vector_binary(colptr_temp,*nonz,*ntimestep,1001);        
         (*colptr)[0] = 1;
         int_t j = 0;
         for (i = 1; i < *nonz; i++)
@@ -488,10 +488,10 @@ dreadhb_dist2(int iam, int_t *nrow, int_t *ncol, int_t *nonz,
         #endif
 
         if ( !iam ){
-            PrintInt10("ai", 100, &(*colptr)[*ncol - 100 + 1]);
-            PrintInt10("aj", 100, &(*rowind)[*nonz-1 - 100 + 1]);
-            Printdouble5("nnz", 100, &(*nzval)[*nonz-1 - 100 + 1]);
-            Printdouble5("b", 100, &(*b_global)[(*ncol)-1 - 100 + 1]);
+            PrintInt10("ai", 100, *colptr);
+            PrintInt10("aj", 100, *rowind);
+            Printdouble5("nnz", 100, *nzval);
+            Printdouble5("b", 100, *b_global);
                        
 
             for ( i = 0; i < *nonz; i++)
@@ -546,14 +546,14 @@ dreadhb_dist3(int iam, int_t *nrow, int_t *ncol, int_t *nonz, double **nzval, do
     index=1007;
     *ntimestep=0;
 
-    int slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
+    int slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
     slen=slen+((*ntimestep)==0?1:(int)log(*ntimestep)+1);
     slen=slen+(index==0?1:(int)log(index)+1);
     char *filename=(char*)malloc(slen+1);
     #if defined (_LONGINT)
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld.txt\0",index,*ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.txt\0",index,*ntimestep);
     #else /* Default */
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d.txt\0",index,*ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.txt\0",index,*ntimestep);
     #endif
     
     *nonz=0;
@@ -604,14 +604,14 @@ dreadhb_dist4(int iam, int_t *nrow, int_t *ncol, int_t *nonz, double **nzval, do
     index=1007;
     ntimestep=0;
 
-    int slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
+    int slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
     slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
     slen=slen+(index==0?1:(int)log(index)+1);
     char *filename=(char*)malloc(slen+1);
     #if defined (_LONGINT)
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.txt\0",index,ntimestep);
     #else /* Default */
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.txt\0",index,ntimestep);
     #endif
     
     *nonz=0;
@@ -856,15 +856,15 @@ void load_ddata_markders_vector_txt(double *data,int_t n,int_t ntimestep,int_t i
         if(maxstep>=n){
             maxstep=n;
         }
-        slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
+        slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
         slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
         slen=slen+(index==0?1:(int)log(index)+1);
         slen=slen+(j==0?1:(int)log(j)+1);
         filename=(char*)malloc(slen+1);
         #if defined (_LONGINT)
-        sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
+        sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
         #else /* Default */
-        sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
+        sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
         #endif        
 
         if(access(filename,0)){
@@ -902,15 +902,15 @@ void load_ddata_markders_vector_binary(double *data,int_t n,int_t ntimestep,int_
         if(maxstep>=n){
             maxstep=n;
         }
-        slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
+        slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
         slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
         slen=slen+(index==0?1:(int)log(index)+1);
         slen=slen+(j==0?1:(int)log(j)+1);
         filename=(char*)malloc(slen+1);
         #if defined (_LONGINT)
-        sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
+        sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
         #else /* Default */
-        sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
+        sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
         #endif        
 
         if(access(filename,0)){
@@ -944,15 +944,15 @@ void load_idata_markders_vector_txt(int_t *data,int_t n,int_t ntimestep,int_t in
         if(maxstep>=n){
             maxstep=n;
         }
-        slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
+        slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
         slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
         slen=slen+(index==0?1:(int)log(index)+1);
         slen=slen+(j==0?1:(int)log(j)+1);
         filename=(char*)malloc(slen+1);
         #if defined (_LONGINT)
-        sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
+        sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
         #else /* Default */
-        sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
+        sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
         #endif        
 
         if(access(filename,0)){
@@ -991,15 +991,15 @@ void load_idata_markders_vector_binary(int_t *data,int_t n,int_t ntimestep,int_t
         if(maxstep>=n){
             maxstep=n;
         }
-        slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
+        slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
         slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
         slen=slen+(index==0?1:(int)log(index)+1);
         slen=slen+(j==0?1:(int)log(j)+1);
         filename=(char*)malloc(slen+1);
         #if defined (_LONGINT)
-        sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
+        sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
         #else /* Default */
-        sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
+        sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
         #endif        
 
         if(access(filename,0)){
@@ -1025,14 +1025,14 @@ void load_idata_vector_txt(int_t *data,int_t n,int_t ntimestep,int_t index)
     int slen;
     FILE *fp;
 
-    slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
     slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
     slen=slen+(index==0?1:(int)log(index)+1);
     filename=(char*)malloc(slen+1);
     #if defined (_LONGINT)
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.txt\0",index,ntimestep);
     #else /* Default */
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.txt\0",index,ntimestep);
     #endif
 
     if(access(filename,0)){
@@ -1060,14 +1060,14 @@ void delete_idata_vector_txt(int_t ntimestep,int_t index)
     int slen;
     FILE *fp;
 
-    slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
     slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
     slen=slen+(index==0?1:(int)log(index)+1);
     filename=(char*)malloc(slen+1);
     #if defined (_LONGINT)
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.txt\0",index,ntimestep);
     #else /* Default */
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.txt\0",index,ntimestep);
     #endif
 
     if(access(filename,0)){
@@ -1087,14 +1087,14 @@ int isexist_idata_vector_txt(int_t ntimestep,int_t index)
     int slen;
     FILE *fp;
 
-    slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
     slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
     slen=slen+(index==0?1:(int)log(index)+1);
     filename=(char*)malloc(slen+1);
     #if defined (_LONGINT)
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.txt\0",index,ntimestep);
     #else /* Default */
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.txt\0",index,ntimestep);
     #endif
 
     if(access(filename,0)){
@@ -1115,14 +1115,14 @@ void load_idata_vector_binary(int_t *data,int_t n,int_t ntimestep,int_t index)
     int slen;
     FILE *fp;
 
-    slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
     slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
     slen=slen+(index==0?1:(int)log(index)+1);
     filename=(char*)malloc(slen+1);
     #if defined (_LONGINT)
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.txt\0",index,ntimestep);
     #else /* Default */
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.txt\0",index,ntimestep);
     #endif
 
     if(access(filename,0)){
@@ -1146,14 +1146,14 @@ void load_idata_vector_binary_c(int_t *data,int_t n,int_t ntimestep,int_t index)
     int slen;
     FILE *fp;
 
-    slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
     slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
     slen=slen+(index==0?1:(int)log(index)+1);
     filename=(char*)malloc(slen+1);
     #if defined (_LONGINT)
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.txt\0",index,ntimestep);
     #else /* Default */
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.txt\0",index,ntimestep);
     #endif
 
     if(access(filename,0)){
@@ -1177,14 +1177,14 @@ void load_ddata_vector_txt(double *data,int_t n,int_t ntimestep,int_t index)
     int slen;
     FILE *fp;
 
-    slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
     slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
     slen=slen+(index==0?1:(int)log(index)+1);
     filename=(char*)malloc(slen+1);
     #if defined (_LONGINT)
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.txt\0",index,ntimestep);
     #else /* Default */
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.txt\0",index,ntimestep);
     #endif
 
     if(access(filename,0)){
@@ -1212,14 +1212,14 @@ void load_ddata_vector_binary(double *data,int_t n,int_t ntimestep,int_t index)
     int slen;
     FILE *fp;
 
-    slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
     slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
     slen=slen+(index==0?1:(int)log(index)+1);
     filename=(char*)malloc(slen+1);
     #if defined (_LONGINT)
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.txt\0",index,ntimestep);
     #else /* Default */
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.txt\0",index,ntimestep);
     #endif
 
     if(access(filename,0)){
@@ -1241,14 +1241,14 @@ void save_ddata_vector_txt(double *data,int_t n,int_t ntimestep,int_t index)
     int slen;
     FILE *fp;
 
-    slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
     slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
     slen=slen+(index==0?1:(int)log(index)+1);
     filename=(char*)malloc(slen+1);
     #if defined (_LONGINT)
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.txt\0",index,ntimestep);
     #else /* Default */
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.txt\0",index,ntimestep);
     #endif
 
     fp=fopen(filename,"w");
@@ -1269,14 +1269,14 @@ void save_idata_vector_txt(int_t *data,int_t n,int_t ntimestep,int_t index)
     int slen;
     FILE *fp;
 
-    slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
     slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
     slen=slen+(index==0?1:(int)log(index)+1);
     filename=(char*)malloc(slen+1);
     #if defined (_LONGINT)
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.txt\0",index,ntimestep);
     #else /* Default */
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.txt\0",index,ntimestep);
     #endif
 
     fp=fopen(filename,"w");
@@ -1297,14 +1297,14 @@ void save_ddata_vector_binary(double *data,int_t n,int_t ntimestep,int_t index)
     int slen;
     FILE *fp;
 
-    slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
     slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
     slen=slen+(index==0?1:(int)log(index)+1);
     filename=(char*)malloc(slen+1);
     #if defined (_LONGINT)
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.txt\0",index,ntimestep);
     #else /* Default */
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.txt\0",index,ntimestep);
     #endif
 
     fp=fopen(filename,"w");
@@ -1315,21 +1315,21 @@ void save_ddata_vector_binary(double *data,int_t n,int_t ntimestep,int_t index)
 
 }
 
-void save_idata_vector_binary(int_t *data,int_t n,int_t ntimestep,int_t index)
+void save_idata_vector_binary(int_t *data,int_t n,int_t ntimestep,int index)
 {
     int_t i;
     char *filename;
     int slen;
     FILE *fp;
 
-    slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
     slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
     slen=slen+(index==0?1:(int)log(index)+1);
     filename=(char*)malloc(slen+1);
     #if defined (_LONGINT)
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.txt\0",index,ntimestep);
     #else /* Default */
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.txt\0",index,ntimestep);
     #endif
 
     fp=fopen(filename,"w");
@@ -1341,6 +1341,482 @@ void save_idata_vector_binary(int_t *data,int_t n,int_t ntimestep,int_t index)
 }
 
 #ifdef Torch
+
+#ifdef Use_harddisk
+// according to save_iam to save
+void save_LUstruct_harddisk(int_t n, gridinfo3d_t *grid3d, dLUstruct_t *LUstruct)
+{
+    
+    gridinfo_t *grid=&(grid3d->grid2d);
+    int_t nb, nsupers;
+    Glu_persist_t *Glu_persist = LUstruct->Glu_persist;
+    dLocalLU_t *Llu = LUstruct->Llu;
+    int_t ntimestep=0;
+
+    int_t minstep=MINSAVESTEP;
+    int_t i,j,maxstep;
+    char *filename;
+    int slen;
+    FILE *fp;
+    
+    nsupers = Glu_persist->supno[n-1] + 1;
+
+    nb = CEILING(nsupers, grid->npcol);
+      
+    int_t index=INDEX_Lnzval_bc_ptr+Llu->save_iam;  
+
+    fpos_t *pos;
+
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".bin\0")-3;
+    slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
+    slen=slen+(index==0?1:(int)log(index)+1);
+    filename=(char*)malloc(slen+1);
+    #if defined (_LONGINT)
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.bin\0",index,ntimestep);
+    #else /* Default */
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.bin\0",index,ntimestep);
+    #endif
+
+    fp=fopen(filename,"wb");
+    Llu->Lnzval_bc_ptr_sumlen = 0;
+    for(i=0;i<nb;i++)
+    {            
+        if ( Llu->Lrowind_bc_ptr[i] && Llu->Lnzval_bc_ptr_ilen[i]) {
+            
+            pos=(fpos_t*)malloc(sizeof(fpos_t)); 
+            fgetpos(fp, pos);
+            Llu->Lnzval_bc_ptr_fileposition[i]=pos;
+            fwrite(Llu->Lnzval_bc_ptr[i], sizeof(double), Llu->Lnzval_bc_ptr_ilen[i], fp);
+            Llu->Lnzval_bc_ptr_sumlen += Llu->Lnzval_bc_ptr_ilen[i];
+        }
+    }
+
+    fclose(fp);
+
+    nb = CEILING(nsupers, grid->nprow);
+    
+    index=INDEX_Unzval_br_ptr+Llu->save_iam;    
+
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".bin\0")-3;
+    slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
+    slen=slen+(index==0?1:(int)log(index)+1);
+    filename=(char*)malloc(slen+1);
+    #if defined (_LONGINT)
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.bin\0",index,ntimestep);
+    #else /* Default */
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.bin\0",index,ntimestep);
+    #endif
+
+    fp=fopen(filename,"wb");
+    Llu->Unzval_br_ptr_sumlen = 0;
+    for(i=0;i<nb;i++)
+    {
+        if ( Llu->Ufstnz_br_ptr[i] && Llu->Unzval_br_ptr_ilen[i] ) {
+            pos=(fpos_t*)malloc(sizeof(fpos_t));
+            fgetpos(fp, pos);
+            Llu->Unzval_br_ptr_fileposition[i]=pos;            
+            fwrite(Llu->Unzval_br_ptr[i], sizeof(double), Llu->Unzval_br_ptr_ilen[i], fp);
+            Llu->Unzval_br_ptr_sumlen += Llu->Unzval_br_ptr_ilen[i];
+        }
+    }
+
+    fclose(fp);    
+
+}
+
+void save_LUstruct_harddisk2(int_t n, gridinfo3d_t *grid3d, dLUstruct_t *LUstruct, int_t nsupers)
+{
+    
+    gridinfo_t *grid=&(grid3d->grid2d);
+    int_t nb;
+    // Glu_persist_t *Glu_persist = LUstruct->Glu_persist;
+    dLocalLU_t *Llu = LUstruct->Llu;
+    int_t ntimestep=0;
+
+    int_t minstep=MINSAVESTEP;
+    int_t i,j,maxstep;
+    char *filename;
+    int slen;
+    FILE *fp;
+    
+    // nsupers = Glu_persist->supno[n-1] + 1;
+    nb = CEILING(nsupers, grid->npcol); 
+    int_t index=INDEX_Lnzval_bc_ptr+Llu->save_iam;
+    fpos_t *pos;
+
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".bin\0")-3;
+    slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
+    slen=slen+(index==0?1:(int)log(index)+1);
+    filename=(char*)malloc(slen+1);
+    #if defined (_LONGINT)
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.bin\0",index,ntimestep);
+    #else /* Default */
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.bin\0",index,ntimestep);
+    #endif   
+
+    fp=fopen(filename,"wb");
+    // Llu->Lnzval_bc_ptr_sumlen = 0;
+    for(i=0;i<nb;i++)
+    {            
+        if ( Llu->Lrowind_bc_ptr[i] && Llu->Lnzval_bc_ptr_ilen[i]) {
+            
+            // pos=(fpos_t*)malloc(sizeof(fpos_t)); 
+            // fgetpos(fp, pos);
+            // Llu->Lnzval_bc_ptr_fileposition[i]=pos;
+            fwrite(Llu->Lnzval_bc_ptr[i], sizeof(double), Llu->Lnzval_bc_ptr_ilen[i], fp);
+            // Llu->Lnzval_bc_ptr_sumlen += Llu->Lnzval_bc_ptr_ilen[i];
+        }
+    }
+
+    fclose(fp);
+
+    nb = CEILING(nsupers, grid->nprow);
+    
+    index=INDEX_Unzval_br_ptr+Llu->save_iam;    
+
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".bin\0")-3;
+    slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
+    slen=slen+(index==0?1:(int)log(index)+1);
+    filename=(char*)malloc(slen+1);
+    #if defined (_LONGINT)
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.bin\0",index,ntimestep);
+    #else /* Default */
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.bin\0",index,ntimestep);
+    #endif
+
+    fp=fopen(filename,"wb");
+    // Llu->Unzval_br_ptr_sumlen = 0;
+    
+    for(i=0;i<nb;i++)
+    {        
+        if ( Llu->Ufstnz_br_ptr[i] && Llu->Unzval_br_ptr_ilen[i] ) {
+            // pos=(fpos_t*)malloc(sizeof(fpos_t));
+            // fgetpos(fp, pos);
+            // Llu->Unzval_br_ptr_fileposition[i]=pos;            
+            fwrite(Llu->Unzval_br_ptr[i], sizeof(double), Llu->Unzval_br_ptr_ilen[i], fp);
+            // Llu->Unzval_br_ptr_sumlen += Llu->Unzval_br_ptr_ilen[i];
+        }
+    }
+
+    fclose(fp);    
+
+}
+
+// Load LUstruct from bin
+int load_LUstruct_harddisk(int_t n, gridinfo3d_t *grid3d, dLUstruct_t *LUstruct)
+{
+    
+    gridinfo_t *grid=&(grid3d->grid2d);
+    int_t nb, nsupers;
+    Glu_persist_t *Glu_persist = LUstruct->Glu_persist;
+    dLocalLU_t *Llu = LUstruct->Llu;
+    int_t ntimestep=0;
+    int_t minstep=MINSAVESTEP;
+    int_t i,j,maxstep,k;
+    char *filename;
+    int slen;
+    FILE *fp;
+    int_t errorflag = 0;
+    nsupers = Glu_persist->supno[n-1] + 1;
+    nb = CEILING(nsupers, grid->npcol);
+      
+    int_t index=INDEX_Lnzval_bc_ptr+Llu->save_iam; 
+    double *iLnzval_bc_ptr;
+
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".bin\0")-3;
+    slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
+    slen=slen+(index==0?1:(int)log(index)+1);
+    filename=(char*)malloc(slen+1);
+    #if defined (_LONGINT)
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.bin\0",index,ntimestep);
+    #else /* Default */
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.bin\0",index,ntimestep);
+    #endif
+    
+    if(access(filename,0)){
+        printf("load_Lnzval_bc_ptr error: %s do not exist.\n",filename);
+        errorflag = -1;
+    }
+    else{
+        fp=fopen(filename,"rb");
+
+        double *temp_Lnzval_bc_ptr = doubleCalloc_dist(Llu->Lnzval_bc_ptr_sumlen);
+        fread(temp_Lnzval_bc_ptr, sizeof(double), Llu->Lnzval_bc_ptr_sumlen, fp);
+        double *pos = temp_Lnzval_bc_ptr;
+       
+        for(i=0;i<nb;i++)
+        {
+            if ( Llu->Lrowind_bc_ptr[i] && Llu->Lnzval_bc_ptr_ilen[i] ){
+                // iLnzval_bc_ptr = load_Lnzval_bc_ptr_harddisk(i, Llu, Llu->save_iam);
+                // Llu->Lnzval_bc_ptr[i] = iLnzval_bc_ptr;
+                iLnzval_bc_ptr = doubleCalloc_dist(Llu->Lnzval_bc_ptr_ilen[i]);
+                memcpy(iLnzval_bc_ptr, pos, Llu->Lnzval_bc_ptr_ilen[i] * sizeof(double));
+                Llu->Lnzval_bc_ptr[i] = iLnzval_bc_ptr;
+                pos += Llu->Lnzval_bc_ptr_ilen[i]; 
+            }
+        } 
+        SUPERLU_FREE(temp_Lnzval_bc_ptr);
+        fclose(fp);
+        
+    }  
+
+    index=INDEX_Unzval_br_ptr+Llu->save_iam;
+
+    nb = CEILING(nsupers, grid->nprow);
+    double *iUnzval_br_ptr;
+
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".bin\0")-3;
+    slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
+    slen=slen+(index==0?1:(int)log(index)+1);
+    filename=(char*)malloc(slen+1);
+    #if defined (_LONGINT)
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.bin\0",index,ntimestep);
+    #else /* Default */
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.bin\0",index,ntimestep);
+    #endif
+
+    if(access(filename,0)){
+        printf("load_Unzval_br_ptr error: %s do not exist.\n",filename);
+        errorflag = -1;
+    }
+    else{
+        fp=fopen(filename,"rb");
+
+        // for(i=0;i<nb;i++)
+        // {
+        //     if ( Llu->Ufstnz_br_ptr[i] && Llu->Unzval_br_ptr_ilen[i] ) {
+        //         iUnzval_br_ptr = load_Unzval_br_ptr_harddisk(i, Llu, Llu->save_iam);
+        //         Llu->Unzval_br_ptr[i] = iUnzval_br_ptr;
+        //     }
+        // }    
+
+        double *temp_Unzval_br_ptr = doubleCalloc_dist(Llu->Unzval_br_ptr_sumlen);
+        fread(temp_Unzval_br_ptr, sizeof(double), Llu->Unzval_br_ptr_sumlen, fp);
+        double *pos = temp_Unzval_br_ptr;
+        for(i=0;i<nb;i++)
+        {
+            if ( Llu->Ufstnz_br_ptr[i] && Llu->Unzval_br_ptr_ilen[i] ){
+                iUnzval_br_ptr = doubleCalloc_dist(Llu->Unzval_br_ptr_ilen[i]);
+                memcpy(iUnzval_br_ptr, pos, Llu->Unzval_br_ptr_ilen[i] * sizeof(double));
+                Llu->Unzval_br_ptr[i] = iUnzval_br_ptr;
+                pos += Llu->Unzval_br_ptr_ilen[i];
+            }
+        } 
+        SUPERLU_FREE(temp_Unzval_br_ptr);
+
+        fclose(fp);        
+    }
+
+    if(errorflag == -1){
+        return errorflag;
+    }
+
+}
+
+double* load_Lnzval_bc_ptr_harddisk(int_t ljb, dLocalLU_t *Llu, int iam)
+{
+    // int iam;
+    // MPI_Comm_rank( MPI_COMM_WORLD, &iam );
+    
+    double *lsub;
+    if(Llu->Lnzval_bc_ptr_ilen[ljb]){
+        lsub=DOUBLE_ALLOC(Llu->Lnzval_bc_ptr_ilen[ljb]);
+    }
+    else{
+        lsub=NULL;
+        return lsub;
+    }
+
+    int_t minstep=MINSAVESTEP;
+    int_t i,j,maxstep;
+    char *filename;
+    int slen;
+    FILE *fp;
+    int_t ntimestep=0;
+
+    int_t index=INDEX_Lnzval_bc_ptr+iam;
+
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".bin\0")-3;
+    slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
+    slen=slen+(index==0?1:(int)log(index)+1);
+    filename=(char*)malloc(slen+1);
+    #if defined (_LONGINT)
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.bin\0",index,ntimestep);
+    #else /* Default */
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.bin\0",index,ntimestep);
+    #endif      
+
+    if(access(filename,0)){
+        printf("load_Lnzval_bc_ptr[%ld]: %s do not exist.\n",ljb,filename);
+        lsub=NULL;
+        return lsub;
+    }
+    else{
+        fp=fopen(filename,"rb");
+
+        fpos_t *pos=Llu->Lnzval_bc_ptr_fileposition[ljb];
+        fsetpos(fp,pos);
+        fread(lsub, sizeof(double), Llu->Lnzval_bc_ptr_ilen[ljb], fp);
+
+        fclose(fp);
+        return lsub;
+    }
+
+}
+
+double* load_Unzval_br_ptr_harddisk(int_t lb, dLocalLU_t *Llu, int iam)
+{
+    // int iam;
+    // MPI_Comm_rank( MPI_COMM_WORLD, &iam );
+    
+    double *uval;
+    if(Llu->Unzval_br_ptr_ilen[lb]){
+        uval=DOUBLE_ALLOC(Llu->Unzval_br_ptr_ilen[lb]);
+    }
+    else{
+        uval=NULL;
+        return uval;
+    }
+
+    int_t minstep=MINSAVESTEP;
+    int_t i,j,maxstep;
+    char *filename;
+    int slen;
+    FILE *fp;
+    int_t ntimestep=0;
+
+    int_t index=INDEX_Unzval_br_ptr+iam;
+
+    j=lb/minstep+1;
+
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".bin\0")-3;
+    slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
+    slen=slen+(index==0?1:(int)log(index)+1);
+    filename=(char*)malloc(slen+1);
+    #if defined (_LONGINT)
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.bin\0",index,ntimestep);
+    #else /* Default */
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.bin\0",index,ntimestep);
+    #endif        
+
+    if(access(filename,0)){
+        printf("load_Unzval_br_ptr[%ld] %s do not exist.\n",lb,filename);
+        uval=NULL;
+        return uval;
+    }
+    else{
+        fp=fopen(filename,"rb");
+
+        fpos_t *pos=Llu->Unzval_br_ptr_fileposition[lb];
+        fsetpos(fp,pos);
+        fread(uval, sizeof(double), Llu->Unzval_br_ptr_ilen[lb], fp);
+
+        fclose(fp);
+        return uval;
+    }
+
+}
+
+int set_iLnzval_bc_ptr_harddisk(double *lsub, int_t ljb, int_t begin, int_t len, dLocalLU_t *Llu, int iam)
+{
+    if(!lsub && !Llu->Lnzval_bc_ptr_ilen[ljb]){
+        return 0;
+    }
+
+    // int iam;
+    // MPI_Comm_rank( MPI_COMM_WORLD, &iam );
+    
+    if(begin+len>Llu->Lnzval_bc_ptr_ilen[ljb]){
+        ABORT("exceed the length of Lnzval_bc_ptr[]\n");
+    }
+
+    int_t minstep=MINSAVESTEP;
+    int_t i,j,maxstep;
+    char *filename;
+    int slen;
+    FILE *fp;
+    int_t ntimestep=0;
+
+    int_t index=INDEX_Lnzval_bc_ptr+iam;
+
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".bin\0")-3;
+    slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
+    slen=slen+(index==0?1:(int)log(index)+1);
+    filename=(char*)malloc(slen+1);
+    #if defined (_LONGINT)
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.bin\0",index,ntimestep);
+    #else /* Default */
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.bin\0",index,ntimestep);
+    #endif
+
+    if(access(filename,0)){
+        printf("set_iLnzval_bc_ptr_txt %s do not exist.\n",filename);
+        return 0;
+    }
+    else{
+        fp=fopen(filename,"rb+");
+
+        fpos_t *pos=Llu->Lnzval_bc_ptr_fileposition[ljb]; 
+        fsetpos(fp,pos);
+        fseek(fp,begin*sizeof(double),SEEK_CUR);
+        fwrite(lsub, sizeof(double), len, fp);
+        fclose(fp);
+
+        return 1;
+    }
+
+}
+
+int set_iUnzval_br_ptr_harddisk(double *uval, int_t lb, int_t begin, int_t len, dLocalLU_t *Llu, int iam)
+{
+    if(!uval && !Llu->Unzval_br_ptr_ilen[lb]){
+        return 0;
+    }
+
+    // int iam;
+    // MPI_Comm_rank( MPI_COMM_WORLD, &iam );
+    
+    if(begin+len>Llu->Unzval_br_ptr_ilen[lb]){
+        ABORT("exceed the length of Unzval_br_ptr[]\n");
+    }
+
+    int_t minstep=MINSAVESTEP;
+    int_t i,j,maxstep;
+    char *filename;
+    int slen;
+    FILE *fp;
+    int_t ntimestep=0;
+
+    int index=INDEX_Unzval_br_ptr+iam;    
+
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".bin\0")-3;
+    slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
+    slen=slen+(index==0?1:(int)log(index)+1);
+    filename=(char*)malloc(slen+1);
+    #if defined (_LONGINT)
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.bin\0",index,ntimestep);
+    #else /* Default */
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.bin\0",index,ntimestep);
+    #endif     
+
+    if(access(filename,0)){
+        printf("set_iUnzval_br_ptr_txt %s do not exist.\n",filename);
+        return 0;
+    }
+    else{
+        fp=fopen(filename,"rb+");
+
+        fpos_t *pos=Llu->Unzval_br_ptr_fileposition[lb]; 
+        fsetpos(fp,pos);
+        fseek(fp,begin*sizeof(double),SEEK_CUR);
+        fwrite(uval, sizeof(double), len, fp);
+        fclose(fp);
+        return 1;
+    }
+
+}
+
+#endif
 #ifdef SuperLargeScale
 // Save LUstruct to txt
 void save_LUstruct_txt(int_t n, gridinfo3d_t *grid3d, dLUstruct_t *LUstruct)
@@ -1372,15 +1848,15 @@ void save_LUstruct_txt(int_t n, gridinfo3d_t *grid3d, dLUstruct_t *LUstruct)
         if(maxstep>=nb){
             maxstep=nb;
         }
-        slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
+        slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
         slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
         slen=slen+(index==0?1:(int)log(index)+1);
         slen=slen+(j==0?1:(int)log(j)+1);
         filename=(char*)malloc(slen+1);
         #if defined (_LONGINT)
-        sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
+        sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
         #else /* Default */
-        sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
+        sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
         #endif
 
         fp=fopen(filename,"w");
@@ -1409,15 +1885,15 @@ void save_LUstruct_txt(int_t n, gridinfo3d_t *grid3d, dLUstruct_t *LUstruct)
         if(maxstep>=nb){
             maxstep=nb;
         }
-        slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
+        slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
         slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
         slen=slen+(index==0?1:(int)log(index)+1);
         slen=slen+(j==0?1:(int)log(j)+1);
         filename=(char*)malloc(slen+1);
         #if defined (_LONGINT)
-        sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
+        sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
         #else /* Default */
-        sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
+        sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
         #endif        
 
         fp=fopen(filename,"w");
@@ -1450,14 +1926,14 @@ void save_RecordMatrix_txt(gridinfo3d_t *grid3d, dLUstruct_t *LUstruct)
     int_t index=INDEX_Lnzval_RecordMatrix+grid3d->iam;  
     dLocalLU_t *Llu = LUstruct->Llu;   
 
-    slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
     slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
     slen=slen+(index==0?1:(int)log(index)+1);
     filename=(char*)malloc(slen+1);
     #if defined (_LONGINT)
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.txt\0",index,ntimestep);
     #else /* Default */
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.txt\0",index,ntimestep);
     #endif    
 
     fp=fopen(filename,"w");
@@ -1505,14 +1981,14 @@ void save_RecordMatrix_txt(gridinfo3d_t *grid3d, dLUstruct_t *LUstruct)
 
     index=INDEX_Unzval_RecordMatrix+grid3d->iam;     
 
-    slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
     slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
     slen=slen+(index==0?1:(int)log(index)+1);
     filename=(char*)malloc(slen+1);
     #if defined (_LONGINT)
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.txt\0",index,ntimestep);
     #else /* Default */
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.txt\0",index,ntimestep);
     #endif    
 
     fp=fopen(filename,"w");
@@ -1572,14 +2048,14 @@ void load_RecordMatrix_txt(gridinfo3d_t *grid3d, dLUstruct_t *LUstruct, int_t *n
     int_t index=INDEX_Lnzval_RecordMatrix+grid3d->iam;  
     dLocalLU_t *Llu = LUstruct->Llu;   
 
-    slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
     slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
     slen=slen+(index==0?1:(int)log(index)+1);
     filename=(char*)malloc(slen+1);
     #if defined (_LONGINT)
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.txt\0",index,ntimestep);
     #else /* Default */
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.txt\0",index,ntimestep);
     #endif
 
     fp=fopen(filename,"r");
@@ -1709,14 +2185,14 @@ void load_RecordMatrix_txt(gridinfo3d_t *grid3d, dLUstruct_t *LUstruct, int_t *n
 
     index=INDEX_Unzval_RecordMatrix+grid3d->iam;     
 
-    slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")-3;
     slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
     slen=slen+(index==0?1:(int)log(index)+1);
     filename=(char*)malloc(slen+1);
     #if defined (_LONGINT)
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld.txt\0",index,ntimestep);
     #else /* Default */
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d.txt\0",index,ntimestep);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d.txt\0",index,ntimestep);
     #endif
 
     fp=fopen(filename,"r");
@@ -1869,15 +2345,15 @@ void save_Changed_LUstruct_txt(int_t n, gridinfo3d_t *grid3d, dLUstruct_t *LUstr
         if(maxstep>=nb){
             maxstep=nb;
         }
-        slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
+        slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
         slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
         slen=slen+(index==0?1:(int)log(index)+1);
         slen=slen+(j==0?1:(int)log(j)+1);
         filename=(char*)malloc(slen+1);
         #if defined (_LONGINT)
-        sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
+        sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
         #else /* Default */
-        sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
+        sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
         #endif
 
         int_t iPart;        
@@ -1914,15 +2390,15 @@ void save_Changed_LUstruct_txt(int_t n, gridinfo3d_t *grid3d, dLUstruct_t *LUstr
         if(maxstep>=nb){
             maxstep=nb;
         }
-        slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
+        slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
         slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
         slen=slen+(index==0?1:(int)log(index)+1);
         slen=slen+(j==0?1:(int)log(j)+1);
         filename=(char*)malloc(slen+1);
         #if defined (_LONGINT)
-        sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
+        sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
         #else /* Default */
-        sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
+        sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
         #endif   
 
         int_t iPart;        
@@ -1977,15 +2453,15 @@ double* load_Lnzval_bc_ptr(int_t ljb, dLocalLU_t *Llu)
 
     j=ljb/minstep+1;
 
-    slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
     slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
     slen=slen+(index==0?1:(int)log(index)+1);
     slen=slen+(j==0?1:(int)log(j)+1);
     filename=(char*)malloc(slen+1);
     #if defined (_LONGINT)
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
     #else /* Default */
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
     #endif        
 
     if(access(filename,0)){
@@ -2031,15 +2507,15 @@ double* load_Unzval_br_ptr(int_t lb, dLocalLU_t *Llu)
 
     j=lb/minstep+1;
 
-    slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
     slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
     slen=slen+(index==0?1:(int)log(index)+1);
     slen=slen+(j==0?1:(int)log(j)+1);
     filename=(char*)malloc(slen+1);
     #if defined (_LONGINT)
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
     #else /* Default */
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
     #endif        
 
     if(access(filename,0)){
@@ -2085,15 +2561,15 @@ int set_iLnzval_bc_ptr_txt(double *lsub, int_t ljb, int_t begin, int_t len, dLoc
 
     j=ljb/minstep+1;
 
-    slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
     slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
     slen=slen+(index==0?1:(int)log(index)+1);
     slen=slen+(j==0?1:(int)log(j)+1);
     filename=(char*)malloc(slen+1);
     #if defined (_LONGINT)
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
     #else /* Default */
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
     #endif        
 
     if(access(filename,0)){
@@ -2138,15 +2614,15 @@ int set_iUnzval_br_ptr_txt(double *uval, int_t lb, int_t begin, int_t len, dLoca
 
     j=lb/minstep+1;
 
-    slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
+    slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
     slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
     slen=slen+(index==0?1:(int)log(index)+1);
     slen=slen+(j==0?1:(int)log(j)+1);
     filename=(char*)malloc(slen+1);
     #if defined (_LONGINT)
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
     #else /* Default */
-    sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
+    sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
     #endif        
 
     if(access(filename,0)){
@@ -2186,7 +2662,7 @@ void save_nLUstruct_txt(int_t n, gridinfo3d_t *grid3d, dLUstruct_t *LUstruct, in
 
     nb = CEILING(nsupers, grid->npcol);
       
-    int_t index=INDEXTEST_Lnzval_bc_ptr+grid3d->iam;  
+    int_t index=INDEX_Lnzval_bc_ptr+grid3d->iam;  
 
     #pragma omp parallel for private(i,maxstep,slen,filename,fp), schedule(dynamic,4)
     for(j=1;j<=nb/minstep+1;j++)
@@ -2195,15 +2671,15 @@ void save_nLUstruct_txt(int_t n, gridinfo3d_t *grid3d, dLUstruct_t *LUstruct, in
         if(maxstep>=nb){
             maxstep=nb;
         }
-        slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
+        slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
         slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
         slen=slen+(index==0?1:(int)log(index)+1);
         slen=slen+(j==0?1:(int)log(j)+1);
         filename=(char*)malloc(slen+1);
         #if defined (_LONGINT)
-        sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
+        sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
         #else /* Default */
-        sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
+        sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
         #endif
 
         fp=fopen(filename,"w");
@@ -2219,7 +2695,7 @@ void save_nLUstruct_txt(int_t n, gridinfo3d_t *grid3d, dLUstruct_t *LUstruct, in
         
     }
 
-    index=INDEXTEST_Unzval_br_ptr+grid3d->iam;
+    index=INDEX_Unzval_br_ptr+grid3d->iam;
 
     nb = CEILING(nsupers, grid->nprow);
     #pragma omp parallel for private(i,maxstep,slen,filename,fp), schedule(dynamic,4)
@@ -2229,15 +2705,15 @@ void save_nLUstruct_txt(int_t n, gridinfo3d_t *grid3d, dLUstruct_t *LUstruct, in
         if(maxstep>=nb){
             maxstep=nb;
         }
-        slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
+        slen=strlen("/home/412-23/test/superlu_test/cage15/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
         slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
         slen=slen+(index==0?1:(int)log(index)+1);
         slen=slen+(j==0?1:(int)log(j)+1);
         filename=(char*)malloc(slen+1);
         #if defined (_LONGINT)
-        sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
+        sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
         #else /* Default */
-        sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
+        sprintf(filename,"/home/412-23/test/superlu_test/cage15/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
         #endif        
 
         fp=fopen(filename,"w");
@@ -2251,148 +2727,6 @@ void save_nLUstruct_txt(int_t n, gridinfo3d_t *grid3d, dLUstruct_t *LUstruct, in
         fclose(fp);
         
     }
-
-}
-
-// Load LUstruct from txt to test
-int load_LUstruct_test(int_t n, gridinfo3d_t *grid3d, dLUstruct_t *LUstruct, int_t l)
-{
-    
-    gridinfo_t *grid=&(grid3d->grid2d);
-    int_t nb, nsupers;
-    Glu_persist_t *Glu_persist = LUstruct->Glu_persist;
-    dLocalLU_t *Llu = LUstruct->Llu;
-    int_t ntimestep=0;
-
-    int_t minstep=MINSAVESTEP;
-    int_t i,j,maxstep,k;
-    char *filename;
-    int slen;
-    FILE *fp;
-    int_t errornum = 0;
-    int_t errorflag = 0;
-    
-    nsupers = Glu_persist->supno[n-1] + 1;
-
-    nb = CEILING(nsupers, grid->npcol);
-      
-    int_t index=INDEXTEST_Lnzval_bc_ptr+grid3d->iam;  
-
-    double *iLnzval_bc_ptr, *lsub;
-    // #pragma omp parallel for private(i,maxstep,slen,filename,fp,lsub,iLnzval_bc_ptr,k) reduction(+:errornum), schedule(dynamic,4)
-    for(j=1;j<=nb/minstep+1;j++)
-    {
-        maxstep=j*minstep;
-        if(maxstep>=nb){
-            maxstep=nb;
-        }
-        slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
-        slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
-        slen=slen+(index==0?1:(int)log(index)+1);
-        slen=slen+(j==0?1:(int)log(j)+1);
-        filename=(char*)malloc(slen+1);
-        #if defined (_LONGINT)
-        sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
-        #else /* Default */
-        sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
-        #endif
-
-        if(access(filename,0)){
-            printf("load_Lnzval_bc_ptr error: %s do not exist.\n",filename);
-            errorflag = -1;
-        }
-        else{
-            fp=fopen(filename,"r");
-
-            for(i=(j-1)*minstep;i<maxstep;i++)
-            {            
-                if ( Llu->Lrowind_bc_ptr[i] && Llu->Lnzval_bc_ptr_ilen[i] && i % l == 0) {
-                    iLnzval_bc_ptr = doubleMalloc_dist(Llu->Lnzval_bc_ptr_ilen[i]);
-                    fread(iLnzval_bc_ptr, sizeof(double), Llu->Lnzval_bc_ptr_ilen[i], fp);
-                    if(Llu->isSave){
-                        Llu->Lnzval_bc_ptr[i] = load_Lnzval_bc_ptr(i, Llu);
-                    }
-                    lsub = Llu->Lnzval_bc_ptr[i];
-                    for (k = 0; k < Llu->Lnzval_bc_ptr_ilen[i]; k++)
-                    {
-                        if(abs(iLnzval_bc_ptr[k]-lsub[k]) > 1e-6){
-                            printf("%d: Lnzval_bc_ptr[%ld][%ld] error: %e, %e\n", grid3d->iam, i, k, iLnzval_bc_ptr[k], lsub[k]);
-                            errornum++;
-                        }
-                    }
-                    if(Llu->isSave){
-                        SUPERLU_FREE(lsub);
-                    }
-                    SUPERLU_FREE(iLnzval_bc_ptr);
-                }
-            }
-            fclose(fp);
-        }       
-        
-    }
-
-    index=INDEXTEST_Unzval_br_ptr+grid3d->iam;
-
-    nb = CEILING(nsupers, grid->nprow);
-    double *iUnzval_br_ptr, *uval;
-    // #pragma omp parallel for private(i,maxstep,slen,filename,fp,uval,iUnzval_br_ptr,k) reduction(+:errornum), schedule(dynamic,4)
-    for(j=1;j<=nb/minstep+1;j++)
-    {        
-        maxstep=j*minstep;
-        if(maxstep>=nb){
-            maxstep=nb;
-        }
-        slen=strlen("/home/412-23/test/superlu_test/geodynamics3/data-\0")+strlen("_\0")+strlen(".txt\0")+strlen("-\0")-4;
-        slen=slen+(ntimestep==0?1:(int)log(ntimestep)+1);
-        slen=slen+(index==0?1:(int)log(index)+1);
-        slen=slen+(j==0?1:(int)log(j)+1);
-        filename=(char*)malloc(slen+1);
-        #if defined (_LONGINT)
-        sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%ld_%ld-%ld.txt\0",index,ntimestep,j);
-        #else /* Default */
-        sprintf(filename,"/home/412-23/test/superlu_test/geodynamics3/data-%8d_%8d-%8d.txt\0",index,ntimestep,j);
-        #endif        
-
-        if(access(filename,0)){
-            printf("load_Unzval_br_ptr error: %s do not exist.\n",filename);
-            errorflag = -1;
-        }
-        else{
-            fp=fopen(filename,"r");
-
-            for(i=(j-1)*minstep;i<maxstep;i++)
-            {            
-                if ( Llu->Ufstnz_br_ptr[i] && Llu->Unzval_br_ptr_ilen[i] && i % l == 0) {
-                    iUnzval_br_ptr = doubleMalloc_dist(Llu->Unzval_br_ptr_ilen[i]);
-                    fread(iUnzval_br_ptr, sizeof(double), Llu->Unzval_br_ptr_ilen[i], fp);
-                    if(Llu->isSave){
-                        Llu->Unzval_br_ptr[i] = load_Unzval_br_ptr(i, Llu);
-                    }
-                    uval = Llu->Unzval_br_ptr[i];
-                    for (k = 0; k < Llu->Unzval_br_ptr_ilen[i]; k++)
-                    {
-                        if(abs(iUnzval_br_ptr[k]-uval[k]) > 1e-6){
-                            printf("%d: Unzval_br_ptr[%ld][%ld] error: %e, %e\n", grid3d->iam, i, k, iUnzval_br_ptr[k], uval[k]);
-                            errornum++;
-                        }
-                    }
-                    if(Llu->isSave){
-                        SUPERLU_FREE(uval);
-                    }
-                    SUPERLU_FREE(iUnzval_br_ptr);
-                }
-            }
-            fclose(fp);
-        }        
-        
-    }
-
-    if(errorflag == -1){
-        return errorflag;
-    }
-    else{
-        return errornum;
-    }    
 
 }
 

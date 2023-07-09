@@ -14,7 +14,7 @@
 //#define GPU_DEBUG
 
 #define PRNTlevel 2
-#define DEBUGlevel 1
+#define DEBUGlevel 0
 
 #include "mpi.h"
 // #include "sec_structs.h"
@@ -1145,6 +1145,8 @@ int dinitSluGPU3D_t(
 	deviceid[id++] = 0;
 	deviceid[id++] = 0;
 	deviceid[id++] = 0;
+	deviceid[id++] = 1;
+	deviceid[id++] = 1;
 	deviceid[id++] = 1;
 	deviceid[id++] = 1;
 	

@@ -2199,9 +2199,23 @@ pdgssvx3d (superlu_dist_options_t * options, SuperMatrix * A,
 			  SUPERLU_MALLOC (sizeof (Glu_freeable_t))))
 			ABORT ("Malloc fails for Glu_freeable.");
 
+			#ifndef Torch
+			for (i = 0; i < grid->npcol * grid->nprow; i++)
+			{
+				MPI_Barrier(grid->comm);
+				if (i == grid->iam)
+				{
+					iinfo = symbfact (options, iam, &GAC, perm_c, etree,
+				      Glu_persist, Glu_freeable);
+				}
+				
+			}
+			
+			#else
 		    /* Every process does this. */
 		    iinfo = symbfact (options, iam, &GAC, perm_c, etree,
 				      Glu_persist, Glu_freeable);
+			#endif
 
 		    stat->utime[SYMBFAC] = SuperLU_timer_ () - t;
 		    if (iinfo < 0) {
@@ -2281,6 +2295,7 @@ pdgssvx3d (superlu_dist_options_t * options, SuperMatrix * A,
 			iinfo = symbfact_SubFree (Glu_freeable);
 			SUPERLU_FREE (Glu_freeable);
 		    }
+		
 	    } else {
 		/* Distribute Pc*Pr*diag(R)*A*diag(C)*Pc' into L and U storage.
 		   NOTE: the row permutation Pc*Pr is applied internally in the
@@ -2393,6 +2408,22 @@ pdgssvx3d (superlu_dist_options_t * options, SuperMatrix * A,
     	// SUPERLU_FREE(LUstruct->Llu->tmpdouble);   
 		
 	}
+	
+	#endif
+
+	#ifdef Use_harddisk
+	
+	for (int i = 0; i < grid3d->npcol*grid3d->nprow*grid3d->npdep; i++)
+	{
+		MPI_Barrier(grid3d->comm);
+		/* code */
+		if(grid3d->iam==i){
+			LUstruct->Llu->save_iam = grid3d->iam;
+			save_LUstruct_harddisk(n, grid3d, LUstruct);			
+			LUstruct->Llu->isSave = TRUE;
+			dDestroy_LU1 (n, grid, LUstruct);
+		}
+	}	
 	
 	#endif
 

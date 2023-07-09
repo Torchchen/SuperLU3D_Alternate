@@ -88,7 +88,7 @@ void *superlu_malloc_dist(size_t size)
     save_idata_vector_binary(&ierror,1,0,1009);
 	save_ddata_vector_txt(&error,1,0,1200);
 	#endif
-	ABORT("superlu_malloc: out of memory");
+	// ABORT("superlu_malloc: out of memory");
     }
 
     ((size_t *) buf)[0] = size;
@@ -100,6 +100,54 @@ void *superlu_malloc_dist(size_t size)
     return (void *) (buf + DWORD);
 }
 
+#ifdef Torch
+#ifdef Use_harddisk
+int superlu_free_dist(void *addr)
+{
+    char *p = ((char *) addr) - DWORD;
+
+    if ( !addr )
+	ABORT("superlu_free: tried to free NULL pointer");
+
+    if ( !p )
+	ABORT("superlu_free: tried to free NULL+DWORD pointer");
+
+    { 
+	int_t n = ((size_t *) p)[0];
+	//printf("superlu_free-dist: n %d\n", n);
+	
+	if ( n==0 ) {
+	    ABORT("superlu_free: tried to free a freed pointer");
+	}
+	*((size_t *) p) = 0; /* Set to zero to detect duplicate free's. */
+#if 0	
+	superlu_malloc_total -= (n + DWORD);
+#else
+	superlu_malloc_total -= n;
+#endif
+
+	if ( superlu_malloc_total < 0 )
+	{
+		// ABORT("superlu_malloc_total went negative");
+		printf("superlu_malloc_total went negative\n");
+		return 1;
+	}
+	    
+	
+	/*free (addr);*/
+	free (p);
+	p = NULL;
+	return 0;
+    }
+
+}
+// int superlu_free_dist(void *addr) { free (addr); return 0;}
+// void *superlu_malloc_dist(size_t size) {
+//     void *buf;
+//     buf = (void *) malloc(size);
+//     return (buf);
+// }
+#else
 void superlu_free_dist(void *addr)
 {
     char *p = ((char *) addr) - DWORD;
@@ -132,7 +180,41 @@ void superlu_free_dist(void *addr)
     }
 
 }
- 
+#endif 
+#else
+void superlu_free_dist(void *addr)
+{
+    char *p = ((char *) addr) - DWORD;
+
+    if ( !addr )
+	ABORT("superlu_free: tried to free NULL pointer");
+
+    if ( !p )
+	ABORT("superlu_free: tried to free NULL+DWORD pointer");
+
+    { 
+	int_t n = ((size_t *) p)[0];
+	//printf("superlu_free-dist: n %d\n", n);
+	
+	if ( n==0 ) {
+	    ABORT("superlu_free: tried to free a freed pointer");
+	}
+	*((size_t *) p) = 0; /* Set to zero to detect duplicate free's. */
+#if 0	
+	superlu_malloc_total -= (n + DWORD);
+#else
+	superlu_malloc_total -= n;
+#endif
+
+	if ( superlu_malloc_total < 0 )
+	    ABORT("superlu_malloc_total went negative");
+	
+	/*free (addr);*/
+	free (p);
+    }
+
+}
+#endif
 #else  /* The production mode. */
 
 #if  0 
@@ -153,17 +235,22 @@ void  superlu_free_dist(void * ptr)  { _mm_free(ptr); }
 
 #else // normal malloc/free 
 
-void *superlu_malloc_dist(size_t size) {
-    void *buf;
-    buf = (void *) malloc(size);
-    return (buf);
-}
-void superlu_free_dist(void *addr) { free (addr); }
+// void *superlu_malloc_dist(size_t size) {
+//     void *buf;
+//     buf = (void *) malloc(size);
+//     return (buf);
+// }
+// #ifdef Torch
+// #ifdef Use_harddisk
+// int superlu_free_dist(void *addr) { free (addr); return 0;}
+// #else
+// void superlu_free_dist(void *addr) { free (addr); }
+// #endif
 
-#endif
+// #endif
 
 #endif  /* End debug malloc/free. */
-
+#endif
 
 
 static void
@@ -488,7 +575,11 @@ static void *expand
  Glu_freeable_t *Glu_freeable  /* modified - global LU data structures */
  )
 {
+	#ifdef Torch
+	float    EXPAND = 1.1;
+	#else
     float    EXPAND = 1.5;
+	#endif
     float    alpha;
     void     *new_mem;
     int_t    new_len, tries, lword, extra, bytes_to_copy;

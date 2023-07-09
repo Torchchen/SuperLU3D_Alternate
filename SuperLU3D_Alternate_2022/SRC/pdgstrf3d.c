@@ -123,7 +123,8 @@ at the top-level directory.
  */
 // #define pdgstrf3d_normal
 // #define BigMem_pdgstrf3d
-#define pdgstrf3d_cpugpu
+// #define pdgstrf3d_cpugpu
+#define pdgstrf3d_harddisk
 
 // #undef SuperLargeScaleGPUBuffer
 
@@ -283,6 +284,90 @@ void backup_LUstruct(dLocalLU_t *Llu_temp, dLocalLU_t *Llu, gridinfo3d_t *grid3d
 	Llu_temp->isUsed_Unzval_br_ptr = isUsed_Unzval_br_ptr;
 }
 
+// backup Llu->save_iam
+void backup_LUstruct_harddisk(dLUstruct_t *LUstruct_temp, dLocalLU_t *Llu, gridinfo3d_t *grid3d, int_t nsupers, int iam, int n)
+{
+    
+    dLocalLU_t *Llu_temp = LUstruct_temp->Llu;
+    int_t i;
+
+    int_t Pc = grid3d->npcol;
+    int_t Pr = grid3d->nprow;
+    
+    int_t nbc = CEILING(nsupers, Pc);
+    int_t nbr = CEILING(nsupers, Pr);
+
+    int_t *Lrowind_bc_ptr_ilen = Llu->Lrowind_bc_ptr_ilen;
+    int_t *Lnzval_bc_ptr_ilen = Llu->Lnzval_bc_ptr_ilen;
+    int_t *Ufstnz_br_ptr_ilen = Llu->Ufstnz_br_ptr_ilen;
+    int_t *Unzval_br_ptr_ilen = Llu->Unzval_br_ptr_ilen;
+
+    Llu_temp->Lrowind_bc_ptr_ilen = intCalloc_dist(nbc);
+    Llu_temp->Lnzval_bc_ptr_ilen = intCalloc_dist(nbc);
+    Llu_temp->Ufstnz_br_ptr_ilen = intCalloc_dist(nbr);
+    Llu_temp->Unzval_br_ptr_ilen = intCalloc_dist(nbr);
+    memcpy(Llu_temp->Lrowind_bc_ptr_ilen, Lrowind_bc_ptr_ilen, nbc * sizeof(int_t));
+    memcpy(Llu_temp->Lnzval_bc_ptr_ilen, Lnzval_bc_ptr_ilen, nbc * sizeof(int_t));
+    memcpy(Llu_temp->Ufstnz_br_ptr_ilen, Ufstnz_br_ptr_ilen, nbr * sizeof(int_t));
+    memcpy(Llu_temp->Unzval_br_ptr_ilen, Unzval_br_ptr_ilen, nbr * sizeof(int_t));
+
+    int_t **isUsed_Lnzval_bc_ptr =(int_t**) SUPERLU_MALLOC(sizeof(int_t*)*nbc);
+
+    Llu_temp->Lrowind_bc_ptr = (int_t**)SUPERLU_MALLOC(nbc * sizeof(int_t*));
+    Llu_temp->Lnzval_bc_ptr = (double**)SUPERLU_MALLOC(nbc * sizeof(double*));
+
+    #pragma omp for
+    for (i = 0; i < nbc ; ++i)
+    {   
+        Llu_temp->Lrowind_bc_ptr[i] = NULL;                      
+        if (Lrowind_bc_ptr_ilen[i])
+        {            
+            int_t *iLrowind_bc_ptr = intCalloc_dist(Lrowind_bc_ptr_ilen[i]);
+            memcpy(iLrowind_bc_ptr, Llu->Lrowind_bc_ptr[i], Lrowind_bc_ptr_ilen[i] * sizeof(int_t));
+            SUPERLU_FREE(Llu->Lrowind_bc_ptr[i]);
+            Llu_temp->Lrowind_bc_ptr[i] = iLrowind_bc_ptr;            
+            
+        }
+        // Llu_temp->Lnzval_bc_ptr[i] = NULL;
+        // if (Lnzval_bc_ptr_ilen[i])
+        // {         
+        //     double *iLnzval_bc_ptr = load_Lnzval_bc_ptr_harddisk(i,Llu,iam);
+        //     Llu_temp->Lnzval_bc_ptr[i] = iLnzval_bc_ptr; 
+        // }
+
+        isUsed_Lnzval_bc_ptr[i]=intCalloc_dist(nPart+1);
+    }
+
+    int_t **isUsed_Unzval_br_ptr = (int_t**)SUPERLU_MALLOC(nbr * sizeof(int_t*));
+    Llu_temp->Ufstnz_br_ptr = (int_t**)SUPERLU_MALLOC(nbr * sizeof(int_t*));
+    Llu_temp->Unzval_br_ptr = (double**)SUPERLU_MALLOC(nbr * sizeof(double*));
+
+    #pragma omp for
+    for (i = 0; i < nbr ; ++i)
+    {
+        Llu_temp->Ufstnz_br_ptr[i] = NULL;       
+        if (Ufstnz_br_ptr_ilen[i])
+        {
+            int_t *iUfstnz_br_ptr = intCalloc_dist(Ufstnz_br_ptr_ilen[i]);
+            memcpy(iUfstnz_br_ptr, Llu->Ufstnz_br_ptr[i], Ufstnz_br_ptr_ilen[i] * sizeof(int_t));
+            SUPERLU_FREE(Llu->Ufstnz_br_ptr[i]);
+            Llu_temp->Ufstnz_br_ptr[i] = iUfstnz_br_ptr;
+            
+        }
+        // Llu_temp->Unzval_br_ptr[i] = NULL;
+        // if (Unzval_br_ptr_ilen[i])
+        // {
+        //     double *iUnzval_br_ptr = load_Unzval_br_ptr_harddisk(i,Llu,iam);       
+        //     Llu_temp->Unzval_br_ptr[i] = iUnzval_br_ptr;
+        // }
+
+        isUsed_Unzval_br_ptr[i]=intCalloc_dist(nPart+1);
+    }    
+
+    Llu_temp->isUsed_Lnzval_bc_ptr = isUsed_Lnzval_bc_ptr;
+	Llu_temp->isUsed_Unzval_br_ptr = isUsed_Unzval_br_ptr;
+}
+
 void restore_LUstruct(dLocalLU_t *Llu, dLocalLU_t *Llu_temp, gridinfo3d_t *grid3d, int_t nsupers)
 {
     int_t i;
@@ -349,6 +434,76 @@ void restore_LUstruct(dLocalLU_t *Llu, dLocalLU_t *Llu_temp, gridinfo3d_t *grid3
         }
     }
 
+    SUPERLU_FREE(Llu_temp->isUsed_Lnzval_bc_ptr);
+	SUPERLU_FREE(Llu_temp->isUsed_Unzval_br_ptr);
+}
+
+void restore_LUstruct_harddisk(dLocalLU_t *Llu, dLocalLU_t *Llu_temp, gridinfo3d_t *grid3d, int_t nsupers, int iam)
+{
+    int_t i;
+
+    int_t Pc = grid3d->npcol;
+    int_t Pr = grid3d->nprow;
+    
+    int_t nbc = CEILING(nsupers, Pc);
+    int_t nbr = CEILING(nsupers, Pr);
+
+    int_t *Lrowind_bc_ptr_ilen = Llu->Lrowind_bc_ptr_ilen;
+    int_t *Lnzval_bc_ptr_ilen = Llu->Lnzval_bc_ptr_ilen;
+    int_t *Ufstnz_br_ptr_ilen = Llu->Ufstnz_br_ptr_ilen;
+    int_t *Unzval_br_ptr_ilen = Llu->Unzval_br_ptr_ilen;
+
+    SUPERLU_FREE(Llu_temp->Lrowind_bc_ptr_ilen);
+    SUPERLU_FREE(Llu_temp->Lnzval_bc_ptr_ilen);
+    SUPERLU_FREE(Llu_temp->Ufstnz_br_ptr_ilen);
+    SUPERLU_FREE(Llu_temp->Unzval_br_ptr_ilen);
+
+    #pragma omp for
+    for (i = 0; i < nbc ; ++i)
+    {         
+        Llu->Lrowind_bc_ptr[i] = NULL;               
+        if (Lrowind_bc_ptr_ilen[i])
+        {            
+            int_t *iLrowind_bc_ptr = intCalloc_dist(Lrowind_bc_ptr_ilen[i]);
+            memcpy(iLrowind_bc_ptr, Llu_temp->Lrowind_bc_ptr[i], Lrowind_bc_ptr_ilen[i] * sizeof(int_t));
+            SUPERLU_FREE(Llu_temp->Lrowind_bc_ptr[i]);
+            Llu->Lrowind_bc_ptr[i] = iLrowind_bc_ptr;
+            
+        }
+        Llu->Lnzval_bc_ptr[i] = NULL;
+        if (Lnzval_bc_ptr_ilen[i])
+        {
+            // double *iLnzval_bc_ptr = doubleCalloc_dist(Lnzval_bc_ptr_ilen[i]);
+            // memcpy(iLnzval_bc_ptr, Llu_temp->Lnzval_bc_ptr[i], Lnzval_bc_ptr_ilen[i] * sizeof(double));
+            SUPERLU_FREE(Llu_temp->Lnzval_bc_ptr[i]);
+            // set_iLnzval_bc_ptr_harddisk(iLnzval_bc_ptr, i, 0, Lnzval_bc_ptr_ilen[i], Llu, iam);
+            
+        }
+
+    }    
+
+    #pragma omp for
+    for (i = 0; i < nbr ; ++i)
+    {
+        Llu->Ufstnz_br_ptr[i] = NULL;           
+        if (Ufstnz_br_ptr_ilen[i])
+        {
+            int_t *iUfstnz_br_ptr = intCalloc_dist(Ufstnz_br_ptr_ilen[i]);
+            memcpy(iUfstnz_br_ptr, Llu_temp->Ufstnz_br_ptr[i], Ufstnz_br_ptr_ilen[i] * sizeof(int_t));
+            SUPERLU_FREE(Llu_temp->Ufstnz_br_ptr[i]);
+            Llu->Ufstnz_br_ptr[i] = iUfstnz_br_ptr;
+            
+        }
+        Llu->Unzval_br_ptr[i] = NULL;
+        if (Unzval_br_ptr_ilen[i])
+        {
+            // double *iUnzval_br_ptr = doubleCalloc_dist(Unzval_br_ptr_ilen[i]);
+            // memcpy(iUnzval_br_ptr, Llu_temp->Unzval_br_ptr[i], Unzval_br_ptr_ilen[i] * sizeof(double));
+            SUPERLU_FREE(Llu_temp->Unzval_br_ptr[i]);
+            // set_iUnzval_br_ptr_harddisk(iUnzval_br_ptr, i, 0, Unzval_br_ptr_ilen[i], Llu, iam);
+        }
+    }
+    
     SUPERLU_FREE(Llu_temp->isUsed_Lnzval_bc_ptr);
 	SUPERLU_FREE(Llu_temp->isUsed_Unzval_br_ptr);
 }
@@ -507,6 +662,150 @@ void dBcastRecv_LUstruct(dLUstruct_t *LUstruct, int sendrank, int recrank, gridi
         MPI_Recv(&(Llu->isSave), 1, MPI_INT, sendrank, tag++, grid3d->zscp.comm, &status);
         #endif
         // MPI_Recv(&(Llu->isEmpty), 1, MPI_INT, sendrank, tag++, grid3d->zscp.comm, &status);
+
+        Llu->ToRecv = ToRecv ;
+        Llu->ToSendD = ToSendD ;
+        Llu->ToSendR = ToSendR ;
+        
+    }
+
+}
+
+// exchange file
+void dBcastRecv_LUstruct_harddisk(dLUstruct_t *LUstruct, int sendrank, int recrank, gridinfo3d_t *grid3d, int_t nsupers)
+{
+    int tag = 500;
+    MPI_Status status;
+    int_t i;
+
+    int_t Pc = grid3d->npcol;
+    int_t Pr = grid3d->nprow;
+    
+    int_t nbc = CEILING(nsupers, Pc);
+    int_t nbr = CEILING(nsupers, Pr);
+
+    dLocalLU_t *Llu = LUstruct->Llu;
+    int_t *Lrowind_bc_ptr_ilen = Llu->Lrowind_bc_ptr_ilen;
+    int_t *Lnzval_bc_ptr_ilen = Llu->Lnzval_bc_ptr_ilen;
+    int_t *Ufstnz_br_ptr_ilen = Llu->Ufstnz_br_ptr_ilen;
+    int_t *Unzval_br_ptr_ilen = Llu->Unzval_br_ptr_ilen;
+
+    if (grid3d->zscp.Iam == sendrank)
+    {
+        Glu_persist_t *Glu_persist = LUstruct->Glu_persist;
+        
+        MPI_Send(&(Glu_persist->xsup_len), 1, mpi_int_t, recrank, tag++, grid3d->zscp.comm);
+        MPI_Send(&(Glu_persist->supno_len), 1, mpi_int_t, recrank, tag++, grid3d->zscp.comm);
+        MPI_Send(Glu_persist->xsup, Glu_persist->xsup_len, mpi_int_t, recrank, tag++, grid3d->zscp.comm);
+        MPI_Send(Glu_persist->supno, Glu_persist->supno_len, mpi_int_t, recrank, tag++, grid3d->zscp.comm); 
+        
+        for (i = 0; i < nbc ; ++i)
+        {                        
+            if (Lrowind_bc_ptr_ilen[i])
+            {
+                int_t *iLrowind_bc_ptr = intCalloc_dist(Lrowind_bc_ptr_ilen[i]);
+                MPI_Recv(iLrowind_bc_ptr, Lrowind_bc_ptr_ilen[i], mpi_int_t, recrank, tag++, grid3d->zscp.comm, &status);
+                MPI_Send(Llu->Lrowind_bc_ptr[i], Lrowind_bc_ptr_ilen[i], mpi_int_t, recrank, tag++, grid3d->zscp.comm);
+                SUPERLU_FREE(Llu->Lrowind_bc_ptr[i]);
+                Llu->Lrowind_bc_ptr[i] = iLrowind_bc_ptr;
+            }            
+        }     
+        
+        
+        // for (i = 0; i < nbr ; ++i)
+        // {
+        //     if (Ufstnz_br_ptr_ilen[i])
+        //     {
+        //         int_t *iUfstnz_br_ptr = intCalloc_dist(Ufstnz_br_ptr_ilen[i]);
+        //         MPI_Recv(iUfstnz_br_ptr, Ufstnz_br_ptr_ilen[i], mpi_int_t, recrank, tag++, grid3d->zscp.comm, &status);
+        //         MPI_Send(Llu->Ufstnz_br_ptr[i], Ufstnz_br_ptr_ilen[i], mpi_int_t, recrank, tag++, grid3d->zscp.comm);
+        //         SUPERLU_FREE(Llu->Ufstnz_br_ptr[i]);
+        //         Llu->Ufstnz_br_ptr[i] = iUfstnz_br_ptr;
+        //     }
+        // }
+
+        Ufstnz_br_ptr_exchange(Llu->Ufstnz_br_ptr, Ufstnz_br_ptr_ilen, nbr, sendrank, recrank, grid3d);
+
+        MPI_Send(Llu->ToRecv, nsupers, MPI_INT, recrank, tag++, grid3d->zscp.comm);
+        MPI_Send(Llu->ToSendD, nbr, MPI_INT, recrank, tag++, grid3d->zscp.comm);
+        for (i = 0; i < nbc; ++i)
+        {
+            /* code */
+            MPI_Send(Llu->ToSendR[i], Pc, MPI_INT, recrank, tag++, grid3d->zscp.comm);
+        }
+
+        MPI_Send( Llu->bufmax, NBUFFERS, mpi_int_t, recrank, tag++, grid3d->zscp.comm);
+        #ifdef SuperLargeScale
+        MPI_Send( &(Llu->isSave), 1, MPI_INT, recrank, tag++, grid3d->zscp.comm);
+        #endif
+        // MPI_Send( &(Llu->isEmpty), 1, MPI_INT, recrank, tag++, grid3d->zscp.comm);
+
+        MPI_Send( &(Llu->Lnzval_bc_ptr_sumlen), 1, mpi_int_t, recrank, tag++, grid3d->zscp.comm);
+        MPI_Send( &(Llu->Unzval_br_ptr_sumlen), 1, mpi_int_t, recrank, tag++, grid3d->zscp.comm);
+    }
+
+    if (grid3d->zscp.Iam == recrank)
+    {        
+        
+        Glu_persist_t *Glu_persist = LUstruct->Glu_persist;        
+
+        MPI_Recv(&(Glu_persist->xsup_len), 1, mpi_int_t, sendrank, tag++, grid3d->zscp.comm, &status);
+        MPI_Recv(&(Glu_persist->supno_len), 1, mpi_int_t, sendrank, tag++, grid3d->zscp.comm, &status);
+        Glu_persist->xsup = intMalloc_dist(Glu_persist->xsup_len);
+        Glu_persist->supno = intMalloc_dist(Glu_persist->supno_len);
+        MPI_Recv(Glu_persist->xsup, Glu_persist->xsup_len, mpi_int_t, sendrank, tag++, grid3d->zscp.comm, &status);
+        MPI_Recv(Glu_persist->supno, Glu_persist->supno_len, mpi_int_t, sendrank, tag++, grid3d->zscp.comm, &status);
+
+        for (i = 0; i < nbc ; ++i)
+        {            
+            if (Lrowind_bc_ptr_ilen[i])
+            {
+                MPI_Send(Llu->Lrowind_bc_ptr[i], Llu->Lrowind_bc_ptr_ilen[i], mpi_int_t, sendrank, tag++, grid3d->zscp.comm);
+                MPI_Recv(Llu->Lrowind_bc_ptr[i], Llu->Lrowind_bc_ptr_ilen[i], mpi_int_t, sendrank, tag++, grid3d->zscp.comm, &status);
+            }
+        }
+
+        // for (i = 0; i < nbr ; ++i)
+        // {
+        //     if (Ufstnz_br_ptr_ilen[i])
+        //     {                
+        //         if (grid3d->zscp.Iam)
+        //         {
+        //             MPI_Send(Llu->Ufstnz_br_ptr[i], Ufstnz_br_ptr_ilen[i], mpi_int_t, sendrank, tag++, grid3d->zscp.comm);
+        //             MPI_Recv(Llu->Ufstnz_br_ptr[i], Ufstnz_br_ptr_ilen[i], mpi_int_t, sendrank, tag++, grid3d->zscp.comm, &status);
+        //         }
+        //         else
+        //         {
+        //             MPI_Send(Llu->Ufstnz_br_ptr[i], Ufstnz_br_ptr_ilen[i] - 1, mpi_int_t, sendrank, tag++, grid3d->zscp.comm);
+        //             MPI_Recv(Llu->Ufstnz_br_ptr[i], Ufstnz_br_ptr_ilen[i] - 1, mpi_int_t, sendrank, tag++, grid3d->zscp.comm, &status);
+        //         }
+        //     }
+            
+        // }
+
+        Ufstnz_br_ptr_exchange(Llu->Ufstnz_br_ptr, Ufstnz_br_ptr_ilen, nbr, sendrank, recrank, grid3d);
+
+        /* Recv from no one (0), left (1), and up (2).*/
+        int *ToRecv = SUPERLU_MALLOC(nsupers * sizeof(int));
+        MPI_Recv(ToRecv, nsupers, MPI_INT, sendrank, tag++, grid3d->zscp.comm, &status);
+                    /* Whether need to send down block row. */
+        int *ToSendD = SUPERLU_MALLOC(nbr * sizeof(int));
+        MPI_Recv(ToSendD, nbr, MPI_INT, sendrank, tag++, grid3d->zscp.comm, &status);
+                    /* List of processes to send right block col. */
+        int **ToSendR = (int **) SUPERLU_MALLOC(nbc * sizeof(int*));
+
+        for (i = 0; i < nbc; ++i)
+        {
+            /* code */
+            //ToSendR[i] = INT_T_ALLOC(Pc);
+            ToSendR[i] = SUPERLU_MALLOC(Pc * sizeof(int));
+            MPI_Recv(ToSendR[i], Pc, MPI_INT, sendrank, tag++, grid3d->zscp.comm, &status);
+        }
+
+        MPI_Recv(Llu->bufmax, NBUFFERS, mpi_int_t, sendrank, tag++, grid3d->zscp.comm, &status); 
+
+        MPI_Recv(&(Llu->Lnzval_bc_ptr_sumlen), 1, mpi_int_t, sendrank, tag++, grid3d->zscp.comm, &status);  
+        MPI_Recv(&(Llu->Unzval_br_ptr_sumlen), 1, mpi_int_t, sendrank, tag++, grid3d->zscp.comm, &status);
 
         Llu->ToRecv = ToRecv ;
         Llu->ToSendD = ToSendD ;
@@ -936,8 +1235,6 @@ void dBcastRecv_LUstruct1(dLUstruct_t *LUstruct, int sendrank, int recrank, grid
             
         // }
 
-        printf("%d, break1\n", grid3d->iam);
-
         for (i = 0; i < nbr ; ++i)
         {        
             int_t ilen;
@@ -980,9 +1277,6 @@ void dBcastRecv_LUstruct1(dLUstruct_t *LUstruct, int sendrank, int recrank, grid
                 
             }
         }
-
-        printf("%d, break2\n", grid3d->iam);
-        
 
         for (i = 0; i < nbr ; ++i)
         {            
@@ -1397,9 +1691,6 @@ void dBcastRecv_LUstruct1(dLUstruct_t *LUstruct, int sendrank, int recrank, grid
         //     /* code */
         // }
 
-        printf("%d, break1\n", grid3d->iam);
-
-
         for (i = 0; i < nbr ; ++i)
         {        
             int_t ilen;
@@ -1442,8 +1733,6 @@ void dBcastRecv_LUstruct1(dLUstruct_t *LUstruct, int sendrank, int recrank, grid
                 
             }
         }
-
-        printf("%d, break2\n", grid3d->iam);        
 
         for (i = 0; i < nbr ; ++i)
         {            
@@ -1601,6 +1890,74 @@ void dBcastRecv_LUstruct1(dLUstruct_t *LUstruct, int sendrank, int recrank, grid
 
 }
 
+void dBcastRecv_LUstruct1_harddisk(dLUstruct_t *LUstruct, int sendrank, int recrank, gridinfo3d_t *grid3d, int_t nsupers)
+{
+    int tag = 800;
+    MPI_Status status;
+    MPI_Request *send_req, *recv_req;
+    int_t i;    
+    int nireq, ndreq;
+
+    int_t Pc = grid3d->npcol;
+    int_t Pr = grid3d->nprow;
+    
+    int_t nbc = CEILING(nsupers, Pc);
+    int_t nbr = CEILING(nsupers, Pr);
+
+    int_t maxnb = SUPERLU_MAX(nbc, nbr);
+
+    dLocalLU_t *Llu = LUstruct->Llu;
+        
+    int_t *Lrowind_bc_ptr_ilen = Llu->Lrowind_bc_ptr_ilen;
+    int_t *Lnzval_bc_ptr_ilen = Llu->Lnzval_bc_ptr_ilen;
+    int_t *Ufstnz_br_ptr_ilen = Llu->Ufstnz_br_ptr_ilen;
+    int_t *Unzval_br_ptr_ilen = Llu->Unzval_br_ptr_ilen;
+
+    int_t **Lrowind_bc_ptr;
+    double **Lnzval_bc_ptr;   
+
+    MPI_Barrier(grid3d->zscp.comm);
+    if (grid3d->zscp.Iam == sendrank)
+    {
+        
+        Glu_persist_t *Glu_persist = LUstruct->Glu_persist;                
+        SUPERLU_FREE(Glu_persist->xsup);
+        SUPERLU_FREE(Glu_persist->supno);
+        SUPERLU_FREE(Glu_persist);  
+
+        idynamicarray_exchange(Llu->Lrowind_bc_ptr, Lrowind_bc_ptr_ilen, nbc, sendrank, recrank, grid3d);
+
+        // ddynamicarray_exchange(Llu->Lnzval_bc_ptr, Lnzval_bc_ptr_ilen, nbc, sendrank, recrank, grid3d);        
+
+        Ufstnz_br_ptr_exchange(Llu->Ufstnz_br_ptr, Ufstnz_br_ptr_ilen, nbr, sendrank, recrank, grid3d);
+
+        // ddynamicarray_exchange(Llu->Unzval_br_ptr, Unzval_br_ptr_ilen, nbr, sendrank, recrank, grid3d);
+        
+        SUPERLU_FREE(Llu->ToRecv);
+        SUPERLU_FREE(Llu->ToSendD);
+        for (i = 0; i < nbc; ++i)
+        {
+            SUPERLU_FREE(Llu->ToSendR[i]);
+        }
+        SUPERLU_FREE(Llu->ToSendR);
+
+    }
+
+    if (grid3d->zscp.Iam == recrank)
+    {        
+               
+        idynamicarray_exchange(Llu->Lrowind_bc_ptr, Lrowind_bc_ptr_ilen, nbc, sendrank, recrank, grid3d);
+
+        // ddynamicarray_exchange(Llu->Lnzval_bc_ptr, Lnzval_bc_ptr_ilen, nbc, sendrank, recrank, grid3d);
+
+        Ufstnz_br_ptr_exchange(Llu->Ufstnz_br_ptr, Ufstnz_br_ptr_ilen, nbr, sendrank, recrank, grid3d);
+
+        // ddynamicarray_exchange(Llu->Unzval_br_ptr, Unzval_br_ptr_ilen, nbr, sendrank, recrank, grid3d);
+        
+    }
+
+}
+
 void idynamicarray_exchange(int_t **data, int_t *ilen, int_t row, int sendrank, int recrank, gridinfo3d_t *grid3d)
 {
     int tag = 800;
@@ -1675,45 +2032,30 @@ void Ufstnz_br_ptr_exchange(int_t **Ufstnz_br_ptr, int_t *Ufstnz_br_ptr_ilen, in
     int_t i;
 
     if (grid3d->zscp.Iam == sendrank)
-    {
-        for (i = 0; i < row ; ++i)
-        {            
-            int_t ilen;
-            if (grid3d->zscp.Iam)
-            {
-                ilen = Ufstnz_br_ptr_ilen[i];
-            }    
-            else
-            {
-                ilen = Ufstnz_br_ptr_ilen[i] - 1;
-            }
-
-            if (ilen > 0)
-            {
-                                         
-                MPI_Send(Ufstnz_br_ptr[i], ilen, mpi_int_t, recrank, tag + i, grid3d->zscp.comm);
-                
-            }
-        }
+    {        
 
         for (i = 0; i < row ; ++i)
-        {            
+        { 
             int_t ilen;
-            if (grid3d->zscp.Iam)
+            ilen = Ufstnz_br_ptr_ilen[i];
+            MPI_Send(&ilen, 1, mpi_int_t, recrank, tag++, grid3d->zscp.comm);
+            if (ilen)
+            {                
+                MPI_Send(Ufstnz_br_ptr[i], ilen, mpi_int_t, recrank, tag++, grid3d->zscp.comm);
+                SUPERLU_FREE(Ufstnz_br_ptr[i]);
+            }
+            MPI_Recv(&ilen, 1, mpi_int_t, recrank, tag++, grid3d->zscp.comm, &status);
+            Ufstnz_br_ptr_ilen[i] = ilen;
+            if (ilen)
             {
-                ilen = Ufstnz_br_ptr_ilen[i];
-            }    
+                Ufstnz_br_ptr[i] = intCalloc_dist(ilen);
+                MPI_Recv(Ufstnz_br_ptr[i], ilen, mpi_int_t, recrank, tag++, grid3d->zscp.comm, &status);
+            }
             else
             {
-                ilen = Ufstnz_br_ptr_ilen[i] - 1;
-            }
-
-            if (ilen > 0)
-            {
-                                
-                MPI_Recv(Ufstnz_br_ptr[i], ilen, mpi_int_t, recrank, tag + i + row, grid3d->zscp.comm, &status);
-                
-            }
+                Ufstnz_br_ptr[i] = NULL;
+            }           
+            
         }
     }
     else
@@ -1721,53 +2063,29 @@ void Ufstnz_br_ptr_exchange(int_t **Ufstnz_br_ptr, int_t *Ufstnz_br_ptr_ilen, in
         int_t **temp_Ufstnz_br_ptr = (int_t**)SUPERLU_MALLOC(row * sizeof(int_t*));
 
         for (i = 0; i < row ; ++i)
-        {        
-            if (Ufstnz_br_ptr_ilen[i])
-            {
-                temp_Ufstnz_br_ptr[i] = intCalloc_dist(Ufstnz_br_ptr_ilen[i]);
+        {
+            int_t ilen, temp_ilen;
+            MPI_Recv(&ilen, 1, mpi_int_t, sendrank, tag++, grid3d->zscp.comm, &status);
+            if(ilen){
+                temp_Ufstnz_br_ptr[i] = intCalloc_dist(ilen);
+                MPI_Recv(temp_Ufstnz_br_ptr[i], ilen, mpi_int_t, sendrank, tag++, grid3d->zscp.comm, &status);
+                temp_ilen = ilen;
             }
+            else{
+                temp_Ufstnz_br_ptr[i] = NULL;
+                temp_ilen = 0;
+            }
+            ilen = Ufstnz_br_ptr_ilen[i];
+            Ufstnz_br_ptr_ilen[i] = temp_ilen;
+            MPI_Send(&ilen, 1, mpi_int_t, sendrank, tag++, grid3d->zscp.comm);
+            if (ilen)
+            {                
+                MPI_Send(Ufstnz_br_ptr[i], ilen, mpi_int_t, sendrank, tag++, grid3d->zscp.comm);
+                SUPERLU_FREE(Ufstnz_br_ptr[i]);                
+            }
+            Ufstnz_br_ptr[i] = temp_Ufstnz_br_ptr[i];
+
         }
-
-        for (i = 0; i < row ; ++i)
-        {            
-            int_t ilen;
-            if (grid3d->zscp.Iam)
-            {
-                ilen = Ufstnz_br_ptr_ilen[i];
-            }    
-            else
-            {
-                ilen = Ufstnz_br_ptr_ilen[i] - 1;
-            }
-
-            if (ilen > 0)
-            {
-                                
-                MPI_Recv(temp_Ufstnz_br_ptr[i], ilen, mpi_int_t, sendrank, tag + i, grid3d->zscp.comm, &status);
-                
-            }
-        } 
-
-        for (i = 0; i < row ; ++i)
-        {            
-            int_t ilen;
-            if (grid3d->zscp.Iam)
-            {
-                ilen = Ufstnz_br_ptr_ilen[i];
-            }    
-            else
-            {
-                ilen = Ufstnz_br_ptr_ilen[i] - 1;
-            }
-
-            if (ilen > 0)
-            {
-                
-                MPI_Send(Ufstnz_br_ptr[i], ilen, mpi_int_t, sendrank, tag + i + row, grid3d->zscp.comm);
-                SUPERLU_FREE(Ufstnz_br_ptr[i]);
-                Ufstnz_br_ptr[i] = temp_Ufstnz_br_ptr[i];
-            }
-        }   
     }
     
 }
@@ -1790,28 +2108,10 @@ void ddynamicarray_exchange(double **data, int_t *ilen, int_t row, int sendrank,
                 
             }
         }
-
-        // for (i = 0; i < row ; ++i)
-        // {            
-        //     if (ilen[i] > 0)
-        //     {
-                                
-        //         MPI_Recv(data[i], ilen[i], MPI_DOUBLE, recrank, tag + i + row, grid3d->zscp.comm, &status);
-                
-        //     }
-        // }
     }
     else
     {
         double **temp_data = (double**)SUPERLU_MALLOC(row * sizeof(double*));
-
-        // for (i = 0; i < row ; ++i)
-        // {        
-        //     if (ilen[i] > 0)
-        //     {
-        //         temp_data[i] = doubleCalloc_dist(ilen[i]);
-        //     }
-        // }
 
         for (i = 0; i < row ; ++i)
         {            
@@ -1824,18 +2124,6 @@ void ddynamicarray_exchange(double **data, int_t *ilen, int_t row, int sendrank,
                 data[i] = temp_data[i];
             }
         } 
-
-        // for (i = 0; i < row ; ++i)
-        // {            
-            
-        //     if (ilen[i] > 0)
-        //     {
-                     
-        //         MPI_Send(data[i], ilen[i], MPI_DOUBLE, sendrank, tag + i + row, grid3d->zscp.comm);
-        //         SUPERLU_FREE(data[i]);
-        //         data[i] = temp_data[i];
-        //     }
-        // }   
     }
     
 }
@@ -2018,35 +2306,37 @@ void Ufstnz_br_ptr_iexchange(int_t **Ufstnz_br_ptr, int_t *Ufstnz_br_ptr_ilen, i
                 ilen = Ufstnz_br_ptr_ilen[i] - 1;
             }
 
-            if (ilen > 0)
-            {
+            // if (ilen > 0)
+            // {
                 
-                if (ilen > MaxBuffer)
-                {
-                    for (int_t j = 0; j < ilen/MaxBuffer + 1; j++)
-                    {
-                        int_t minstep = j * MaxBuffer;
-                        int_t len = MaxBuffer;
-                        if (minstep + len >= ilen)
-                        {
-                            len = ilen - minstep;
-                        }
+            //     if (ilen > MaxBuffer)
+            //     {
+            //         for (int_t j = 0; j < ilen/MaxBuffer + 1; j++)
+            //         {
+            //             int_t minstep = j * MaxBuffer;
+            //             int_t len = MaxBuffer;
+            //             if (minstep + len >= ilen)
+            //             {
+            //                 len = ilen - minstep;
+            //             }
                         
-                        if (len)
-                        {
-                            MPI_Isend(Ufstnz_br_ptr[i] + minstep, len, mpi_int_t, recrank, tag + i + row * (j + 1), grid3d->zscp.comm, &req);
-                            MPI_Wait(&req, &status);
-                        }
+            //             if (len)
+            //             {
+            //                 MPI_Isend(Ufstnz_br_ptr[i] + minstep, len, mpi_int_t, recrank, tag + i + row * (j + 1), grid3d->zscp.comm, &req);
+            //                 MPI_Wait(&req, &status);
+            //             }
                         
-                    }				
-                }
-                else
-                {                   
-                    MPI_Isend(Ufstnz_br_ptr[i], ilen, mpi_int_t, recrank, tag + i + row, grid3d->zscp.comm, &req);
-                    MPI_Wait(&req, &status);
-                }
+            //         }				
+            //     }
+            //     else
+            //     {                   
+            //         MPI_Isend(Ufstnz_br_ptr[i], ilen, mpi_int_t, recrank, tag + i + row, grid3d->zscp.comm, &req);
+            //         MPI_Wait(&req, &status);
+            //     }
                 
-            }
+            // }
+            MPI_Isend(Ufstnz_br_ptr[i], ilen, mpi_int_t, recrank, tag + i + row, grid3d->zscp.comm, &req);
+            MPI_Wait(&req, &status);
         }
 
         for (i = 0; i < row ; ++i)
@@ -2090,6 +2380,8 @@ void Ufstnz_br_ptr_iexchange(int_t **Ufstnz_br_ptr, int_t *Ufstnz_br_ptr_ilen, i
                 }
                 
             }
+
+            
         }
     }
     else
@@ -4329,6 +4621,1490 @@ int_t pdgstrf3d(superlu_dist_options_t *options, int m, int n, double anorm,
                     dreduceAllAncestors3d(ilvl, myNodeCount, treePerm,
                                         LUvsb, LUstruct, grid3d, SCT );
                 }
+
+            }
+        }        
+        
+        
+        printf("%d: ilvl %d\n", grid3d->iam, ilvl);        
+        MPI_Barrier( grid3d->comm);
+        #endif       
+        
+
+        SCT->tSchCompUdt3d[ilvl] = ilvl == 0 ? SCT->NetSchurUpTimer
+	    : SCT->NetSchurUpTimer - SCT->tSchCompUdt3d[ilvl - 1];
+
+        #ifdef Torch_stat
+        printf("%d: tSchCompUdt3d[%d] = %e s\n", grid3d->iam, ilvl, SCT->tSchCompUdt3d[ilvl]);
+        #endif
+        
+        #if 0
+        num_threads=num_threads*1.5;
+        omp_set_num_threads(num_threads);
+        #endif
+
+    } /*for (int_t ilvl = 0; ilvl < maxLvl; ++ilvl)*/
+
+    MPI_Barrier( grid3d->comm);
+    
+    #ifdef SuperLargeScaleGPU
+    if (Llu->isRecordingForGPU == RecordingForGPU)
+    {
+        if (Llu->MaxGPUMemory <= Llu->LimitGPUMemory)
+        {
+            printf("(%d) MaxGPUMemory %f, LimitGPUMemory %f, LimitGPUMemory is appropriate.\n", grid3d->iam, Llu->MaxGPUMemory, Llu->LimitGPUMemory);
+        }
+        else
+        {
+            printf("(%d) MaxGPUMemory %f, LimitGPUMemory %f, LimitGPUMemory is not appropriate.\n", grid3d->iam, Llu->MaxGPUMemory, Llu->LimitGPUMemory);
+        }       
+        
+    }
+    #endif
+    
+    SCT->pdgstrfTimer = SuperLU_timer_() - SCT->pdgstrfTimer; 
+    #ifdef test_0318
+    MPI_Barrier(grid3d->comm);
+
+    
+    sleep(10);
+    MPI_Barrier(grid3d->comm);
+    for (int i = 0; i < grid3d->npcol*grid3d->nprow*grid3d->npdep; i++)
+    {
+        
+        /* code */
+        if(grid3d->iam==i){
+            dPrintLblocks(i, HyP->nsupers, grid, LUstruct->Glu_persist, LUstruct->Llu);
+            dPrintUblocks(i, HyP->nsupers, grid, LUstruct->Glu_persist, LUstruct->Llu);
+        }
+        MPI_Barrier(grid3d->comm);
+        sleep(5);
+    }
+    
+    #endif    
+
+#ifdef ITAC_PROF
+    VT_traceoff();
+#endif
+
+#ifdef MAP_PROFILE
+    allinea_stop_sampling();
+#endif
+
+    reduceStat(FACT, stat, grid3d);
+    // sherry added
+    /* Deallocate factorization specific buffers */
+    #ifndef SuperLargeScaleGPUBuffer
+    freePackLUInfo(&packLUInfo);
+    
+    freeFactStat(&factStat);
+    
+    freeFactNodelists(&fNlists);
+    freeMsgsArr(numLA, msgss);
+    freeCommRequestsArr(SUPERLU_MAX(mxLeafNode, numLA), comReqss);
+    dfreeScuBufs(&scuBufs);
+    dLluBufFreeArr(numLA, LUvsbs);
+    #else
+    
+    if (grid3d->iam == 0)
+    {
+        freePackLUInfo(&packLUInfo);
+        freeFactStat(&factStat);
+        dfreeScuBufs(&scuBufs);
+        freeFactNodelists(&fNlists);
+        freeCommRequestsArr(SUPERLU_MAX(mxLeafNode, numLA), comReqss);
+    }
+    freeMsgsArr(numLA, msgss);
+
+    #endif
+
+    #ifndef SuperLargeScaleGPUBuffer
+    dfreeDiagFactBufsArr(mxLeafNode, dFBufs);
+    #endif
+    
+    Free_HyP(HyP);
+
+#if ( DEBUGlevel>=1 )
+    CHECK_MALLOC (grid3d->iam, "Exit pdgstrf3d()");
+#endif
+    return 0;
+
+} /* pdgstrf3d */
+#endif
+
+#ifdef pdgstrf3d_harddisk
+int_t pdgstrf3d(superlu_dist_options_t *options, int m, int n, double anorm,
+		trf3Dpartition_t*  trf3Dpartition, SCT_t *SCT,
+		dLUstruct_t *LUstruct, gridinfo3d_t * grid3d,
+		SuperLUStat_t *stat, int *info)
+{
+    gridinfo_t* grid = &(grid3d->grid2d);
+    dLocalLU_t *Llu = LUstruct->Llu;
+
+    // problem specific contants
+    int_t ldt = sp_ienv_dist (3);     /* Size of maximum supernode */
+    //    double s_eps = slamch_ ("Epsilon");  -Sherry
+    #ifndef Torch_dmach_dist
+    double s_eps = smach_dist("Epsilon");
+    #else
+    double s_eps = dmach_dist("Epsilon");
+    #endif
+
+    #ifdef Torch_dmach_dist
+    s_eps = 1e-6;
+    #endif
+
+    double thresh = s_eps * anorm;
+    
+    #ifdef Torch_dmach_dist
+    printf("thresh %e, s_eps %e, anorm %e\n", thresh, s_eps ,anorm);
+    #endif
+
+#if ( DEBUGlevel>=1 )
+    CHECK_MALLOC (grid3d->iam, "Enter pdgstrf3d()");
+#endif
+
+    // Initilize stat
+    stat->ops[FACT] = 0;
+    stat->current_buffer = 0.0;
+    stat->peak_buffer    = 0.0;
+    stat->gpu_buffer     = 0.0;
+    //if (!grid3d->zscp.Iam && !grid3d->iam) printf("Using NSUP=%d\n", (int) ldt);
+
+    //getting Nsupers
+    int_t nsupers = getNsupers(n, LUstruct->Glu_persist);
+
+    // Grid related Variables
+    int_t iam = grid->iam; // in 2D grid
+    int num_threads = getNumThreads(grid3d->iam);
+
+    factStat_t factStat;
+    initFactStat(nsupers, &factStat);
+
+#if 0  // sherry: not used
+    ddiagFactBufs_t dFBuf;
+    dinitDiagFactBufs(ldt, &dFBuf);
+
+    commRequests_t comReqs;   
+    initCommRequests(&comReqs, grid);
+
+    msgs_t msgs;
+    initMsgs(&msgs);
+#endif
+
+    SCT->tStartup = SuperLU_timer_();
+    packLUInfo_t packLUInfo;
+    initPackLUInfo(nsupers, &packLUInfo);
+
+    dscuBufs_t scuBufs;
+    dinitScuBufs(ldt, num_threads, nsupers, &scuBufs, LUstruct, grid);
+
+    factNodelists_t  fNlists;
+    initFactNodelists( ldt, num_threads, nsupers, &fNlists);
+
+    // tag_ub initialization
+    int tag_ub = set_tag_ub();
+    int_t maxLvl = log2i(grid3d->zscp.Np) + 1;    
+
+#if ( PRNTlevel>=1 )
+    if (grid3d->iam == 0) {
+        printf ("MPI tag upper bound = %d\n", tag_ub); fflush(stdout);
+    }
+#endif
+
+    // trf3Dpartition_t*  trf3Dpartition = initTrf3Dpartition(nsupers, options, LUstruct, grid3d);
+    gEtreeInfo_t gEtreeInfo = trf3Dpartition->gEtreeInfo;
+    int_t* iperm_c_supno = trf3Dpartition->iperm_c_supno;
+    int_t* myNodeCount = trf3Dpartition->myNodeCount;
+    int_t* myTreeIdxs = trf3Dpartition->myTreeIdxs;
+    int_t* myZeroTrIdxs = trf3Dpartition->myZeroTrIdxs;
+    sForest_t** sForests = trf3Dpartition->sForests;
+    int_t** treePerm = trf3Dpartition->treePerm ;
+    dLUValSubBuf_t *LUvsb = trf3Dpartition->LUvsb;
+
+    /* Initializing factorization specific buffers */
+
+    int_t numLA = getNumLookAhead(options);
+    #ifndef SuperLargeScaleGPUBuffer
+    dLUValSubBuf_t** LUvsbs = dLluBufInitArr( SUPERLU_MAX( numLA, grid3d->zscp.Np ), LUstruct);
+    #endif
+    msgs_t**msgss = initMsgsArr(numLA);
+    int_t mxLeafNode    = 0;
+    for (int ilvl = 0; ilvl < maxLvl; ++ilvl) {
+        if (sForests[myTreeIdxs[ilvl]] && sForests[myTreeIdxs[ilvl]]->topoInfo.eTreeTopLims[1] > mxLeafNode )
+            mxLeafNode    = sForests[myTreeIdxs[ilvl]]->topoInfo.eTreeTopLims[1];
+    }  
+
+    #ifndef SuperLargeScaleGPUBuffer
+    ddiagFactBufs_t** dFBufs = dinitDiagFactBufsArr(mxLeafNode, ldt, grid);
+    #endif
+    commRequests_t** comReqss = initCommRequestsArr(SUPERLU_MAX(mxLeafNode, numLA), ldt, grid);
+    /* Setting up GPU related data structures */
+
+    int_t first_l_block_acc = 0;
+    int_t first_u_block_acc = 0;
+    int_t Pc = grid->npcol;
+    int_t Pr = grid->nprow;
+    int_t mrb =    (nsupers + Pr - 1) / Pr;
+    int_t mcb =    (nsupers + Pc - 1) / Pc;
+    HyP_t *HyP = (HyP_t *) SUPERLU_MALLOC(sizeof(HyP_t));
+
+    dInit_HyP(HyP, Llu, mcb, mrb);
+    HyP->first_l_block_acc = first_l_block_acc;
+    HyP->first_u_block_acc = first_u_block_acc; 
+
+    int superlu_acc_offload = HyP->superlu_acc_offload;
+
+    #ifdef AllCPU
+    superlu_acc_offload = 0;
+    #endif
+
+    #ifdef CPU_GPU
+    if (grid3d->zscp.Iam)
+    {        
+        superlu_acc_offload = 0;
+    }
+    else
+    {
+        superlu_acc_offload = 1;
+    }
+    
+    
+    #endif
+
+    #ifdef AllGPU
+    superlu_acc_offload = 1;
+    #endif
+
+    #ifdef SuperLargeScaleGPU
+    if(LUstruct->Llu->isRecordingForGPU == RecordingForGPU){
+        superlu_acc_offload = 0;
+    }
+    #endif
+
+    //int_t bigu_size = getBigUSize(nsupers, grid, LUstruct);
+    int_t bigu_size = getBigUSize(nsupers, grid,
+    	  	                  LUstruct->Llu->Lrowind_bc_ptr);
+    HyP->bigu_size = bigu_size;
+    int_t buffer_size =sp_ienv_dist(8); // get_max_buffer_size ();
+    HyP->buffer_size = buffer_size;
+    HyP->nsupers = nsupers;
+
+    //OLD: int_t* perm_c_supno = getPerm_c_supno(nsupers, options, LUstruct, grid);
+	int_t* perm_c_supno = getPerm_c_supno(nsupers, options,
+					      LUstruct->etree,
+					      LUstruct->Glu_persist,
+					      LUstruct->Llu->Lrowind_bc_ptr,
+					      LUstruct->Llu->Ufstnz_br_ptr,
+					      grid);    
+    
+    #ifdef Torch
+    d2Hreduce_t* d2Hred;
+    dsluGPU_t *sluGPU;
+    d2Hreduce_t d2HredObj;
+    d2Hred = &d2HredObj;
+    dsluGPU_t sluGPUobj;
+    sluGPU = &sluGPUobj;
+    #endif
+    
+    if (superlu_acc_offload)
+    {
+
+        /*Now initialize the GPU data structure*/
+        dLUstruct_gpu_t *A_gpu, *dA_gpu;
+        #ifndef Torch
+        d2Hreduce_t* d2Hred;
+        dsluGPU_t *sluGPU;
+        d2Hreduce_t d2HredObj;
+        d2Hred = &d2HredObj;
+        dsluGPU_t sluGPUobj;
+        sluGPU = &sluGPUobj;
+        #endif
+        
+        sluGPU->isNodeInMyGrid = getIsNodeInMyGrid(nsupers, maxLvl, myNodeCount, treePerm);       
+        
+    
+        #if 0 	
+        /* Sherry: For GPU code on titan, we do not need performance 
+            lookup tables since due to difference in CPU-GPU performance,
+            it didn't make much sense to do any Schur-complement update
+            on CPU, except for the lookahead-update on CPU. Same should
+            hold for summit as well. (from Piyush)   */
+
+                /*Initilize the lookup tables */
+                LookUpTableInit(iam);
+                acc_async_cost = get_acc_async_cost();
+        #ifdef GPU_DEBUG
+                if (!iam) printf("Using MIC async cost of %lf \n", acc_async_cost);
+        #endif
+        #endif	
+        #ifndef SuperLargeScaleGPUBuffer
+	/* Initialize GPU data structures */
+        dinitSluGPU3D_t(sluGPU, LUstruct, grid3d, perm_c_supno,
+                        n, buffer_size, bigu_size, ldt);
+
+        HyP->first_u_block_acc = sluGPU->A_gpu->first_u_block_gpu;
+        HyP->first_l_block_acc = sluGPU->A_gpu->first_l_block_gpu;
+        HyP->nCudaStreams = sluGPU->nCudaStreams;
+        #endif
+    }
+
+    #ifdef SuperLargeScaleGPUBuffer
+    #ifdef Torch_0419_Case2
+    if (!grid3d->zscp.Iam)
+    {
+        Llu->isEmpty = 2;
+    }
+    else{
+        Llu->isEmpty = 1;
+    }        
+    #else
+    Llu->isEmpty = 0;
+    #endif
+    #endif
+
+    /*====  starting main factorization loop =====*/
+    MPI_Barrier( grid3d->comm);
+    SCT->tStartup = SuperLU_timer_() - SCT->tStartup;
+    // int_t myGrid = grid3d->zscp.Iam;   
+    
+    
+#ifdef ITAC_PROF
+    VT_traceon();
+#endif
+#ifdef MAP_PROFILE
+    allinea_start_sampling();
+#endif
+    SCT->pdgstrfTimer = SuperLU_timer_();
+
+    #if 0
+    num_threads=(double)num_threads/pow(2,maxLvl-1);
+    omp_set_num_threads(num_threads);
+    #endif
+
+    #ifdef SuperLargeScale
+    Llu->core_status = OutOfCore;            
+    #endif     
+
+    #ifdef SuperLargeScaleGPU
+    if (superlu_acc_offload == 0 && Llu->isRecordingForGPU == RecordingForGPU)
+    {
+        Llu->isUsed_Lnzval_bc_ptr_Record = intMalloc_dist(CEILING(nsupers, grid->npcol));
+        Llu->isUsed_Unzval_br_ptr_Record = intMalloc_dist(CEILING(nsupers, grid->nprow));
+        #pragma omp parallel for
+        for(int_t i=0; i<CEILING(nsupers, grid->npcol); i++)
+        {        
+            SetVectorStatus(Llu->isUsed_Lnzval_bc_ptr_Record[i], Unused);
+        }
+        #pragma omp parallel for
+        for(int_t i=0; i<CEILING(nsupers, grid->nprow); i++)
+        {        
+            SetVectorStatus(Llu->isUsed_Unzval_br_ptr_Record[i], Unused);
+        }
+        Llu->MaxGPUMemory = 0;
+    }
+    if (superlu_acc_offload && Llu->isRecordingForGPU == LoadedRecordForGPU)
+    {
+        
+        sluGPU->A_gpu->nexttopoLvl_Lnzval = -1;
+        sluGPU->A_gpu->nexttopoLvl_Unzval = -1;
+        sluGPU->A_gpu->nextk0_Lnzval = -1;
+        sluGPU->A_gpu->nextk0_Unzval = -1;
+        sluGPU->A_gpu->pretopoLvl_Lnzval = 0;
+        sluGPU->A_gpu->pretopoLvl_Unzval = 0;
+        sluGPU->A_gpu->pre_lrecordid = 1;
+        sluGPU->A_gpu->pre_urecordid = 1;
+        
+        #pragma omp parallel for
+        for(int_t i=0; i<CEILING(nsupers, grid->npcol); i++)
+        {        
+            SetVectorStatus(sluGPU->A_gpu->isGPUUsed_Lnzval_bc_ptr_host[i], GPUUnused);
+            (sluGPU->A_gpu->isCPUUsed_Lnzval_bc_ptr_host[i], CPUUnused);
+        }
+        #pragma omp parallel for
+        for(int_t i=0; i<CEILING(nsupers, grid->nprow); i++)
+        {        
+            SetVectorStatus(sluGPU->A_gpu->isGPUUsed_Unzval_br_ptr_host[i], GPUUnused);
+            SetVectorStatus(sluGPU->A_gpu->isCPUUsed_Unzval_br_ptr_host[i], CPUUnused);
+        }
+        
+        load_RecordMatrix_txt(grid3d, LUstruct, &(sluGPU->A_gpu->nexttopoLvl_Lnzval), &(sluGPU->A_gpu->nexttopoLvl_Unzval), &(sluGPU->A_gpu->nextk0_Lnzval), &(sluGPU->A_gpu->nextk0_Unzval), sluGPU->A_gpu->LnzvalPtr_host, sluGPU->A_gpu->UnzvalPtr_host, sluGPU->A_gpu->isGPUUsed_Lnzval_bc_ptr_host, sluGPU->A_gpu->isGPUUsed_Unzval_br_ptr_host, &(sluGPU->A_gpu->Lnzval_bc_ptr_len), &(sluGPU->A_gpu->Unzval_br_ptr_len), sluGPU->A_gpu->UsedOrder_Lnzval, sluGPU->A_gpu->UsedOrder_Unzval);
+        printf("break2\n");
+        checkCudaErrors(cudaMemcpy( (sluGPU->A_gpu->LnzvalPtr), sluGPU->A_gpu->LnzvalPtr_host, CEILING(nsupers, grid->npcol) * sizeof(int_t), cudaMemcpyHostToDevice)) ;
+        checkCudaErrors(cudaMemcpy( (sluGPU->A_gpu->UnzvalPtr), sluGPU->A_gpu->UnzvalPtr_host, CEILING(nsupers, grid->nprow) * sizeof(int_t), cudaMemcpyHostToDevice)) ;
+        // printf("break2\n");
+
+        // save_RecordMatrix_txt(grid3d, LUstruct);
+        // while (1)
+        // {
+        //     /* code */
+        // }
+        
+    } 
+
+    #endif
+
+    #ifdef SuperLargeScaleGPUBuffer
+    int_t numForests = (1 << maxLvl) - 1;
+    MPI_Status status;
+    #endif
+
+    for (int ilvl = 0; ilvl < maxLvl; ++ilvl)
+    {
+        #ifndef SuperLargeScaleGPUBuffer
+        /* if I participate in this level */
+        if (!myZeroTrIdxs[ilvl])
+        {
+            //int_t tree = myTreeIdxs[ilvl];
+            sForest_t* sforest = sForests[myTreeIdxs[ilvl]];            
+
+            /* main loop over all the supernodes */
+            if (sforest) /* 2D factorization at individual subtree */
+            {
+                #ifdef Torch 
+                
+                int_t nb = CEILING(nsupers, grid->npcol);
+                // for(int_t i=0; i<nb; i++)
+                // {                            
+                //     for (int_t j = 0; j < nPart; j++)
+                //     {
+                //         SetVectorStatus(Llu->isUsed_Lnzval_bc_ptr[i][j], Unused);
+                //     }                    
+                // }
+
+                // nb = CEILING(nsupers, grid->nprow);
+                // for(int_t i=0; i<nb; i++)
+                // {                    
+                //     for (int_t j = 0; j < nPart; j++)
+                //     {
+                //         SetVectorStatus(Llu->isUsed_Unzval_br_ptr[i][j], Unused);
+                //     }
+                // }
+
+                #ifdef SuperLargeScaleGPU
+                Llu->ilvl = ilvl;
+                #endif
+
+                #endif
+
+                double tilvl = SuperLU_timer_();
+
+                if(superlu_acc_offload){
+
+                    #ifdef SuperLargeScaleGPUBuffer
+                    if (ilvl == 0)
+                    {
+                       
+                    /* Initialize GPU data structures */
+                        dinitSluGPU3D_t(sluGPU, LUstruct, grid3d, perm_c_supno,
+                                        n, buffer_size, bigu_size, ldt);
+
+                        HyP->first_u_block_acc = sluGPU->A_gpu->first_u_block_gpu;
+                        HyP->first_l_block_acc = sluGPU->A_gpu->first_l_block_gpu;
+                        HyP->nCudaStreams = sluGPU->nCudaStreams;
+                    }
+                    #endif
+                    
+                    dsparseTreeFactor_ASYNC_GPU(
+                        sforest,
+                        comReqss, &scuBufs,  &packLUInfo,
+                        msgss, LUvsbs, dFBufs,  &factStat, &fNlists,
+                        &gEtreeInfo, options,  iperm_c_supno, ldt,
+                        sluGPU,  d2Hred,  HyP, LUstruct, grid3d, stat,
+                        thresh,  SCT, tag_ub, info);
+                }
+                
+                else{
+                    dsparseTreeFactor_ASYNC(sforest, comReqss,  &scuBufs, &packLUInfo,
+                        msgss, LUvsbs, dFBufs, &factStat, &fNlists,
+                        &gEtreeInfo, options, iperm_c_supno, ldt,
+                        HyP, LUstruct, grid3d, stat,
+                        thresh,  SCT, tag_ub, info );
+                }
+
+                /*now reduce the updates*/
+                SCT->tFactor3D[ilvl] = SuperLU_timer_() - tilvl;
+                sForests[myTreeIdxs[ilvl]]->cost = SCT->tFactor3D[ilvl];
+
+                #ifdef Torch_stat
+                printf("%d: tFactor3D[%d] = %e s\n", grid3d->iam, ilvl, SCT->tFactor3D[ilvl]);
+                #endif
+            }
+            else
+            {
+                #ifdef SuperLargeScaleGPU
+                Llu->ilvl = ilvl;
+                if (Llu->isRecordingForGPU == RecordingForGPU)
+                {
+                    Llu->Lnzval_RecordMatrix[Llu->ilvl] = (int_t***)SUPERLU_MALLOC(sizeof(int_t**));
+                    int_t **LRecordMatrix = (int_t**)SUPERLU_MALLOC(sizeof(int_t*));
+                    int_t *iLnzval_RecordMatrix = intMalloc_dist(1);
+                    iLnzval_RecordMatrix[0] = 1;
+                    
+                    LRecordMatrix[0] = iLnzval_RecordMatrix;
+                    Llu->Lnzval_RecordMatrix[Llu->ilvl][0] = LRecordMatrix;
+
+                    Llu->Unzval_RecordMatrix[Llu->ilvl] = (int_t***)SUPERLU_MALLOC(sizeof(int_t**));
+                    int_t **URecordMatrix = (int_t**)SUPERLU_MALLOC(sizeof(int_t*));
+                    int_t *iUnzval_RecordMatrix = intMalloc_dist(1);
+                    iUnzval_RecordMatrix[0] = 1;
+                    
+                    URecordMatrix[0] = iUnzval_RecordMatrix;
+                    Llu->Unzval_RecordMatrix[Llu->ilvl][0] = URecordMatrix;
+                }
+                #endif
+            }
+            
+
+            #ifdef SuperLargeScale
+            Llu->core_status = OutOfCore;
+            #endif
+            
+            if (ilvl < maxLvl - 1)     /*then reduce before factorization*/
+            {
+                if(superlu_acc_offload){
+                    dreduceAllAncestors3d_GPU(
+                        ilvl, myNodeCount, treePerm, LUvsb,
+                        LUstruct, grid3d, sluGPU, d2Hred, &factStat, HyP,
+                        SCT );
+
+                    #ifdef SuperLargeScaleGPUBuffer
+                    dreduceAllAncestors3d(ilvl, myNodeCount, treePerm, 	                      LUvsb, LUstruct, grid3d, SCT );
+                    #endif
+                }
+                else{
+
+                    dreduceAllAncestors3d(ilvl, myNodeCount, treePerm,
+                                        LUvsb, LUstruct, grid3d, SCT );
+                }
+
+            }       
+
+        } /*if (!myZeroTrIdxs[ilvl])  ... If I participate in this level*/
+        else
+        {            
+            #ifdef SuperLargeScaleGPU
+            Llu->ilvl = ilvl;
+
+            if (Llu->isRecordingForGPU == RecordingForGPU)
+            {
+                Llu->Lnzval_RecordMatrix[Llu->ilvl] = (int_t***)SUPERLU_MALLOC(sizeof(int_t**));
+                int_t **LRecordMatrix = (int_t**)SUPERLU_MALLOC(sizeof(int_t*));
+                int_t *iLnzval_RecordMatrix = intMalloc_dist(1);
+                iLnzval_RecordMatrix[0] = 1;
+                
+                LRecordMatrix[0] = iLnzval_RecordMatrix;
+                Llu->Lnzval_RecordMatrix[Llu->ilvl][0] = LRecordMatrix;
+
+                Llu->Unzval_RecordMatrix[Llu->ilvl] = (int_t***)SUPERLU_MALLOC(sizeof(int_t**));
+                int_t **URecordMatrix = (int_t**)SUPERLU_MALLOC(sizeof(int_t*));
+                int_t *iUnzval_RecordMatrix = intMalloc_dist(1);
+                iUnzval_RecordMatrix[0] = 1;
+                
+                URecordMatrix[0] = iUnzval_RecordMatrix;
+                Llu->Unzval_RecordMatrix[Llu->ilvl][0] = URecordMatrix;
+            }
+            #endif
+        }
+
+        #else        
+
+        if (ilvl == 0)
+        {
+            
+            for (int i = grid3d->npdep - 1; i >= 0; i--)
+            {
+                MPI_Barrier(grid3d->comm);
+                            
+                if (i > 0)
+                {
+                    if ((i == grid3d->zscp.Iam && !Llu->isEmpty)  || (grid3d->zscp.Iam == 0 && !Llu->isEmpty))
+                    {
+                        if (grid3d->zscp.Iam == 0)
+                        {
+                            continue;
+                        }
+                        
+                        if(superlu_acc_offload){
+
+                            #ifdef Torch_batch_init
+
+                            for (int j = 0; j < grid3d->npcol * grid3d->nprow; j++)
+                            {
+                                MPI_Barrier(grid->comm);
+                                if (j == grid->iam)
+                                {
+                                    /* Initialize GPU data structures */
+                                    dinitSluGPU3D_t(sluGPU, LUstruct, grid3d, perm_c_supno,
+                                                    n, buffer_size, bigu_size, ldt);
+                                }
+                                
+                            }
+
+                            #else
+                            /* Initialize GPU data structures */
+                            dinitSluGPU3D_t(sluGPU, LUstruct, grid3d, perm_c_supno,
+                                            n, buffer_size, bigu_size, ldt);
+                            #endif
+
+                            HyP->first_u_block_acc = sluGPU->A_gpu->first_u_block_gpu;
+                            HyP->first_l_block_acc = sluGPU->A_gpu->first_l_block_gpu;
+                            HyP->nCudaStreams = sluGPU->nCudaStreams;
+                            sluGPU->A_gpu->isEmpty = 0;
+                        }
+                            
+                        
+                        /* if I participate in this level */
+                        if (!myZeroTrIdxs[ilvl])
+                        {
+                            //int_t tree = myTreeIdxs[ilvl];
+                            sForest_t* sforest = sForests[myTreeIdxs[ilvl]];            
+
+                            /* main loop over all the supernodes */
+                            if (sforest) /* 2D factorization at individual subtree */
+                            {                
+                                double tilvl = SuperLU_timer_();
+                                ddiagFactBufs_t** dFBufs = dinitDiagFactBufsArr(mxLeafNode, ldt, grid);
+                                dLUValSubBuf_t** LUvsbs = dLluBufInitArr( SUPERLU_MAX( numLA, grid3d->zscp.Np ), LUstruct);
+
+                                if(superlu_acc_offload){
+                                    
+                                    dsparseTreeFactor_ASYNC_GPU(
+                                        sforest,
+                                        comReqss, &scuBufs,  &packLUInfo,
+                                        msgss, LUvsbs, dFBufs,  &factStat, &fNlists,
+                                        &gEtreeInfo, options,  iperm_c_supno, ldt,
+                                        sluGPU,  d2Hred,  HyP, LUstruct, grid3d, stat,
+                                        thresh,  SCT, tag_ub, info);
+                                }
+                                
+                                else{
+                                    dsparseTreeFactor_ASYNC(sforest, comReqss,  &scuBufs, &packLUInfo,
+                                        msgss, LUvsbs, dFBufs, &factStat, &fNlists,
+                                        &gEtreeInfo, options, iperm_c_supno, ldt,
+                                        HyP, LUstruct, grid3d, stat,
+                                        thresh,  SCT, tag_ub, info );
+                                }
+
+                                freeCommRequestsArr(SUPERLU_MAX(mxLeafNode, numLA), comReqss);
+                                dfreeDiagFactBufsArr(mxLeafNode, dFBufs);
+                                dLluBufFreeArr(numLA, LUvsbs);
+
+                                /*now reduce the updates*/
+                                SCT->tFactor3D[ilvl] = SuperLU_timer_() - tilvl;
+                                sForests[myTreeIdxs[ilvl]]->cost = SCT->tFactor3D[ilvl];
+
+                                #ifdef Torch_stat
+                                printf("%d: tFactor3D[%d] = %e s\n", grid3d->iam, ilvl, SCT->tFactor3D[ilvl]);
+                                #endif
+                            }
+                            
+                            if (ilvl < maxLvl - 1)     /*then reduce before factorization*/
+                            {
+                                if(superlu_acc_offload){
+                                    
+                                    dreduceAllAncestors3d_GPU(
+                                        ilvl, myNodeCount, treePerm, LUvsb,
+                                        LUstruct, grid3d, sluGPU, d2Hred, &factStat, HyP,
+                                        SCT );
+                                    
+                                    if (maxLvl > 2)
+                                    {
+                                        dsendAllLUpanelGPU2HOST(LUstruct, sluGPU, nsupers,  grid);
+                                    }
+                                    
+                                    if (maxLvl == 2) {
+                                        dfree_LUstruct_gpu(sluGPU->A_gpu);
+                                        dfreeScuBufs(&scuBufs);
+                                    }
+                                    else
+                                    {
+                                        dfree_LUstruct_gpu_Buffer(sluGPU->A_gpu);
+                                    }
+                                    
+                                }                        
+
+                            }                            
+
+                            freePackLUInfo(&packLUInfo);
+                            freeFactStat(&factStat);
+                            freeFactNodelists(&fNlists);       
+
+                        } /*if (!myZeroTrIdxs[ilvl])  ... If I participate in this level*/
+                    }
+
+                    if ((i == grid3d->zscp.Iam && Llu->isEmpty) || grid3d->zscp.Iam == 0)
+                    {
+                        int_t nNodes;
+
+                        if (Llu->isEmpty == 1)
+                        {
+                            
+                            MPI_Send(&myZeroTrIdxs[ilvl], 1, mpi_int_t, 0, 100, grid3d->zscp.comm);
+
+                            MPI_Send(myTreeIdxs, maxLvl, mpi_int_t, 0, 101, grid3d->zscp.comm);
+
+                            if (!myZeroTrIdxs[ilvl])
+                            {  
+                                // sForests
+                                int_t *sForests_nNodes = intCalloc_dist(numForests);
+
+                                for (int j = 0; j < numForests; ++j)
+                                {
+                                    if (sForests[j])
+                                    {
+                                        sForests_nNodes[j] = sForests[j]->nNodes;
+                                    }                                
+                                }
+                                MPI_Send(sForests_nNodes, numForests, mpi_int_t, 0, 102, grid3d->zscp.comm);
+                                
+                                for (int j = 0; j < numForests; ++j)
+                                {
+                                    if (sForests[j])
+                                    {
+                                        dBcastRecv_sforest(sForests[j], i, 0, grid3d, nsupers);
+                                    }
+                                }
+
+                                SUPERLU_FREE(sForests_nNodes);
+                                sForest_t* sforest = sForests[myTreeIdxs[ilvl]];
+
+                                if(superlu_acc_offload){
+                                    int tag = 400;
+
+                                    #ifdef Use_harddisk
+                                    
+                                    // for (int j = 0; j < grid3d->npcol * grid3d->nprow; j++)
+                                    // {
+                                    //     // LUstruct
+                                    //     MPI_Barrier(grid->comm);
+                                    //     if (j == grid->iam)
+                                    //     {
+                                            /* code */
+                                            dBcastRecv_LUstruct_harddisk(LUstruct, i, 0, grid3d, nsupers);
+                                    //     }                                       
+                                        
+                                    // } 
+                                    #endif                 
+
+                                    // perm_c_supno
+                                    MPI_Send(perm_c_supno, nsupers, mpi_int_t, 0, tag++, grid3d->zscp.comm);
+
+                                    // bigu_size
+                                    MPI_Send(&bigu_size, 1, mpi_int_t, 0, tag++, grid3d->zscp.comm);
+
+                                    // sluGPU                                    
+                                    MPI_Send(sluGPU->isNodeInMyGrid, nsupers, mpi_int_t, 0, tag++, grid3d->zscp.comm);
+
+                                }
+
+                                /* main loop over all the supernodes */
+                                if (sforest) /* 2D factorization at individual subtree */
+                                {
+                                    int tag = 600;
+
+                                    // comReqss
+                                    MPI_Send(&mxLeafNode, 1, mpi_int_t, 0, tag++, grid3d->zscp.comm);
+
+                                    // bigu_size
+                                    MPI_Send(&bigu_size, 1, mpi_int_t, 0, tag++, grid3d->zscp.comm);
+
+                                    // scuBufs
+                                    MPI_Send(scuBufs.bigV, 8 * ldt * ldt * num_threads, MPI_DOUBLE, 0, tag++, grid3d->zscp.comm);
+                                    MPI_Send(scuBufs.bigU, bigu_size, MPI_DOUBLE, 0, tag++, grid3d->zscp.comm);
+
+                                    // gEtreeInfo
+                                    MPI_Send(gEtreeInfo.setree, nsupers, mpi_int_t, 0, tag++, grid3d->zscp.comm);
+                                    MPI_Send(gEtreeInfo.numChildLeft, nsupers, mpi_int_t, 0, tag++, grid3d->zscp.comm);
+
+                                    // iperm_c_supno
+                                    MPI_Send(iperm_c_supno, nsupers, mpi_int_t, 0, tag++, grid3d->zscp.comm);
+
+                                    // scuBufs
+                                    // MPI_Recv(scuBufs.bigV, 8 * ldt * ldt * num_threads, MPI_DOUBLE, 0, tag++, grid3d->zscp.comm, &status);
+                                    // MPI_Recv(scuBufs.bigU, bigu_size, MPI_DOUBLE, 0, tag++, grid3d->zscp.comm, &status);
+                                    
+                                }
+
+                                if (ilvl < maxLvl - 1)     /*then reduce before factorization*/
+                                {
+                                    if(superlu_acc_offload){
+                                        int tag = 700;
+                                        // myNodeCount
+                                        MPI_Send(myNodeCount, maxLvl, mpi_int_t, 0, tag++, grid3d->zscp.comm);
+
+                                        // myGrid
+                                        MPI_Send(&(Llu->isEmpty), 1, MPI_INT, 0, tag++, grid3d->zscp.comm);
+
+                                        // iam
+                                        MPI_Send(&(grid3d->zscp.Iam), 1, MPI_INT, 0, tag++, grid3d->zscp.comm);
+                                        
+                                    }
+                                }
+
+                                // for (int j = 0; j < grid3d->npcol * grid3d->nprow; j++)
+                                // {
+                                //     MPI_Barrier(grid->comm);
+                                //     if (j == grid->iam)
+                                //     {                                        
+                                        // exchange LUStruct
+                                        dBcastRecv_LUstruct1_harddisk(LUstruct, 0, i, grid3d, nsupers);
+                                //     }
+                                // }
+                                
+                            }
+                            MPI_Barrier(grid->comm);
+                            
+                        }
+                        else
+                        {
+                            // grid3d->zscp.Iam == 0
+                            int_t myZeroTrIdxs_ilvl;
+                            MPI_Recv(&myZeroTrIdxs_ilvl, 1, mpi_int_t, i, 100, grid3d->zscp.comm, &status);
+
+                            HyP_t *HyP_temp = (HyP_t *) SUPERLU_MALLOC(sizeof(HyP_t));
+                            dLUstruct_t LUstruct_temp;                            
+
+                            d2Hreduce_t* d2Hred_temp;
+                            dsluGPU_t *sluGPU_temp;
+
+                            int_t* myTreeIdxs_temp = (int_t*) SUPERLU_MALLOC (maxLvl * sizeof (int_t));
+                            MPI_Recv(myTreeIdxs_temp, maxLvl, mpi_int_t, i, 101, grid3d->zscp.comm, &status);
+
+                            #ifdef Torch_stat
+                            double time_exchange = SuperLU_timer_();
+
+                            SCT->tExchange[ilvl] = 0;
+                            #endif
+
+                            if (!myZeroTrIdxs_ilvl)
+                            {
+
+                                // sForests
+                                int_t *sForests_nNodes = intCalloc_dist(numForests);
+                                MPI_Recv(sForests_nNodes, numForests, mpi_int_t, i, 102, grid3d->zscp.comm, &status);
+                                
+                                sForest_t **sForests_temp = (sForest_t**)SUPERLU_MALLOC (sizeof (sForest_t*) * numForests);    
+                                
+                                for (int j = 0; j < numForests; ++j)
+                                {
+                                    sForest_t *sforest_temp = NULL;
+                                    if (sForests_nNodes[j])
+                                    {
+                                        sforest_temp = SUPERLU_MALLOC (sizeof (sForest_t));
+                                        dBcastRecv_sforest(sforest_temp, i, 0, grid3d, nsupers);
+                                    }
+                                    sForests_temp[j] = sforest_temp;
+                                }
+
+                                SUPERLU_FREE(sForests_nNodes);
+
+                                sForest_t *sforest_temp = sForests_temp[myTreeIdxs_temp[ilvl]];                                
+
+                                int_t *perm_c_supno_temp;  
+                                d2Hreduce_t d2HredObj_temp;
+                                d2Hred_temp = &d2HredObj_temp;
+                                dsluGPU_t sluGPUobj_temp;
+                                sluGPU_temp = &sluGPUobj_temp;                
+
+                                if(superlu_acc_offload){
+
+                                    int tag = 400;                                    
+
+                                    // LUstruct
+                                    dLUstructInit (grid3d->npcol, &LUstruct_temp);
+
+                                    #ifdef Use_harddisk
+                                    LUstruct_temp.Llu->save_iam = i * grid3d->npcol * grid3d->nprow + grid->iam;
+                                    LUstruct_temp.Llu->isSave = FALSE;
+
+                                    #ifdef Torch_stat
+                                    double time_backup_LUstruct_harddisk = SuperLU_timer_();
+                                    #endif
+
+                                    // for (int j = 0; j < grid3d->npcol * grid3d->nprow; j++)
+                                    // {
+                                    //     // LUstruct
+                                    //     MPI_Barrier(grid->comm);
+                                        // if (j == grid->iam)
+                                        // {
+                                            backup_LUstruct_harddisk(&LUstruct_temp, Llu, grid3d, nsupers, LUstruct_temp.Llu->save_iam, n);
+                                        // }
+                                        
+                                    // }  
+
+                                    #ifdef Torch_stat
+                                    printf("%d: time_backup_LUstruct_harddisk[%d] = %e s\n", grid3d->iam, ilvl, SuperLU_timer_() - time_backup_LUstruct_harddisk);
+                                    #endif
+                                    
+                                    #endif
+
+                                    #ifdef Torch_stat
+                                    double time_dBcastRecv_LUstruct_harddisk = SuperLU_timer_();
+                                    #endif
+
+                                    // for (int j = 0; j < grid3d->npcol * grid3d->nprow; j++)
+                                    // {
+                                    //     // LUstruct
+                                    //     MPI_Barrier(grid->comm);
+                                    //     if (j == grid->iam)
+                                    //     {
+                                            dBcastRecv_LUstruct_harddisk(&LUstruct_temp, i, 0, grid3d, nsupers);
+                                    //     }
+                                        
+                                    // }  
+
+                                    #ifdef Torch_stat
+                                    printf("%d: time_dBcastRecv_LUstruct_harddisk[%d] = %e s\n", grid3d->iam, ilvl, SuperLU_timer_() - time_dBcastRecv_LUstruct_harddisk);
+                                    #endif
+
+                                    #ifdef Torch_stat
+                                    double time_load_LUstruct_harddisk = SuperLU_timer_();
+                                    #endif
+                                    
+                                    for (int j = 0; j < grid3d->npcol * grid3d->nprow; j++)
+                                    {
+                                        // LUstruct
+                                        MPI_Barrier(grid->comm);
+                                        if (j == grid->iam)
+                                        {
+                                            load_LUstruct_harddisk(n, grid3d, &LUstruct_temp);
+                                        }
+                                        
+                                    } 
+
+                                    #ifdef Torch_stat
+                                    printf("%d: time_load_LUstruct_harddisk[%d] = %e s\n", grid3d->iam, ilvl, SuperLU_timer_() - time_load_LUstruct_harddisk);
+                                    #endif
+
+                                    // perm_c_supno
+                                    perm_c_supno_temp  = SUPERLU_MALLOC( nsupers * sizeof(int_t) );
+                                    MPI_Recv(perm_c_supno_temp, nsupers, mpi_int_t, i, tag++, grid3d->zscp.comm, &status);
+
+                                    // bigu_size
+                                    int_t bigu_size_temp;
+                                    MPI_Recv(&bigu_size_temp, 1, mpi_int_t, i, tag++, grid3d->zscp.comm, &status);
+
+                                    // sluGPU
+                                    sluGPU_temp->isNodeInMyGrid = INT_T_ALLOC (nsupers);
+                                    MPI_Recv(sluGPU_temp->isNodeInMyGrid, nsupers, mpi_int_t, i, tag++, grid3d->zscp.comm, &status);
+
+                                    // HyP
+                                    dInit_HyP(HyP_temp, LUstruct_temp.Llu, mcb, mrb);
+                                    
+                                    #ifdef Torch_batch_init
+                                    for (int j = 0; j < grid3d->npcol * grid3d->nprow; j++)
+                                    {
+                                        MPI_Barrier(grid->comm);
+                                        if (j == grid->iam)
+                                        {
+                                            /* Initialize GPU data structures */
+                                            dinitSluGPU3D_t(sluGPU_temp, &LUstruct_temp, grid3d, perm_c_supno_temp,
+                                                            n, buffer_size, bigu_size_temp, ldt);
+                                        }
+                                    }
+                                    #else
+                                    
+                                    /* Initialize GPU data structures */
+                                    dinitSluGPU3D_t(sluGPU_temp, &LUstruct_temp, grid3d, perm_c_supno_temp,
+                                                    n, buffer_size, bigu_size_temp, ldt);
+                                    #endif
+                                    
+                                    HyP_temp->bigu_size = bigu_size_temp;
+                                    HyP_temp->buffer_size = buffer_size;
+                                    HyP_temp->nsupers = nsupers;
+                                    HyP_temp->first_u_block_acc = sluGPU_temp->A_gpu->first_u_block_gpu;
+                                    HyP_temp->first_l_block_acc = sluGPU_temp->A_gpu->first_l_block_gpu;
+                                    HyP_temp->nCudaStreams = sluGPU_temp->nCudaStreams;
+                                    sluGPU_temp->A_gpu->isEmpty = 0;
+
+                                    SUPERLU_FREE(perm_c_supno_temp);
+                                                                    
+                                }                                
+
+                                // packLUInfo
+                                packLUInfo_t packLUInfo_temp;
+                                initPackLUInfo(nsupers, &packLUInfo_temp);
+
+                                // factStat
+                                factStat_t factStat_temp;
+                                initFactStat(nsupers, &factStat_temp);
+
+                                // fNlists
+                                factNodelists_t  fNlists_temp;
+                                initFactNodelists( ldt, num_threads, nsupers, &fNlists_temp);
+
+                                gEtreeInfo_t gEtreeInfo_temp;
+                                int_t* iperm_c_supno_temp;
+
+                                /* main loop over all the supernodes */
+                                if (sforest_temp) /* 2D factorization at individual subtree */
+                                {
+                                    int tag = 600;
+
+                                    // comReqss
+                                    int_t mxLeafNode_temp;
+                                    MPI_Recv(&mxLeafNode_temp, 1, mpi_int_t, i, tag++, grid3d->zscp.comm, &status);
+                                    commRequests_t** comReqss_temp = initCommRequestsArr(SUPERLU_MAX(mxLeafNode_temp, numLA), ldt, grid);
+
+                                    // bigu_size
+                                    int_t bigu_size_temp;
+                                    MPI_Recv(&bigu_size_temp, 1, mpi_int_t, i, tag++, grid3d->zscp.comm, &status);
+
+                                    // scuBufs
+                                    dscuBufs_t scuBufs_temp;
+                                    scuBufs_temp.bigV = dgetBigV(ldt, num_threads);
+                                    scuBufs_temp.bigU = doubleMalloc_dist(bigu_size_temp);
+                                    MPI_Recv(scuBufs_temp.bigV, 8 * ldt * ldt * num_threads, MPI_DOUBLE, i, tag++, grid3d->zscp.comm, &status);
+                                    MPI_Recv(scuBufs_temp.bigU, bigu_size_temp, MPI_DOUBLE, i, tag++, grid3d->zscp.comm, &status);
+
+                                    // dFBufs
+                                    ddiagFactBufs_t** dFBufs = dinitDiagFactBufsArr(mxLeafNode_temp, ldt, grid);
+
+                                    // gEtreeInfo                                
+                                    int_t *setree = intMalloc_dist(nsupers);
+                                    MPI_Recv(setree, nsupers, mpi_int_t, i, tag++, grid3d->zscp.comm, &status);
+                                    gEtreeInfo_temp.setree = setree;
+                                    gEtreeInfo_temp.numChildLeft = (int_t* ) SUPERLU_MALLOC(sizeof(int_t) * nsupers);
+                                    MPI_Recv(gEtreeInfo_temp.numChildLeft, nsupers, mpi_int_t, i, tag++, grid3d->zscp.comm, &status);
+
+                                    // iperm_c_supno
+                                    iperm_c_supno_temp = INT_T_ALLOC(nsupers);
+                                    MPI_Recv(iperm_c_supno_temp, nsupers, mpi_int_t, i, tag++, grid3d->zscp.comm, &status);
+
+                                    dLUValSubBuf_t** LUvsbs = dLluBufInitArr( SUPERLU_MAX( numLA, grid3d->zscp.Np ), &LUstruct_temp);
+
+                                    #ifdef Torch_stat
+                                    SCT->tExchange[ilvl] += (SuperLU_timer_() - time_exchange);
+                                    #endif
+
+                                    double tilvl = SuperLU_timer_();
+                                    
+                                    if(superlu_acc_offload){
+                                        dsparseTreeFactor_ASYNC_GPU(
+                                        sforest_temp,
+                                        comReqss_temp, &scuBufs_temp,  &packLUInfo_temp,
+                                        msgss, LUvsbs, dFBufs,  &factStat_temp, &fNlists_temp,
+                                        &gEtreeInfo_temp, options,  iperm_c_supno_temp, ldt,
+                                        sluGPU_temp,  d2Hred_temp,  HyP_temp, &LUstruct_temp, grid3d, stat,
+                                        thresh,  SCT, tag_ub, info);
+                                    }                                    
+
+                                    // scuBufs
+                                    // MPI_Send(scuBufs_temp.bigV, 8 * ldt * ldt * num_threads, MPI_DOUBLE, i, tag++, grid3d->zscp.comm);
+                                    // MPI_Send(scuBufs_temp.bigU, bigu_size, MPI_DOUBLE, i, tag++, grid3d->zscp.comm);
+
+                                    freeCommRequestsArr(SUPERLU_MAX(mxLeafNode_temp, numLA), comReqss_temp);
+                                    dfreeScuBufs(&scuBufs_temp);
+                                    dfreeDiagFactBufsArr(mxLeafNode_temp, dFBufs);
+                                    dLluBufFreeArr(numLA, LUvsbs);
+                                    SUPERLU_FREE(gEtreeInfo_temp.setree);
+                                    SUPERLU_FREE(gEtreeInfo_temp.numChildLeft);
+                                    SUPERLU_FREE(iperm_c_supno_temp);
+
+                                    /*now reduce the updates*/
+                                    SCT->tFactor3D[ilvl] = SuperLU_timer_() - tilvl;
+                                    sForests[myTreeIdxs[ilvl]]->cost = SCT->tFactor3D[ilvl];
+
+                                    #ifdef Torch_stat
+                                    printf("%d: tFactor3D[%d] = %e s\n", grid3d->iam, ilvl, SCT->tFactor3D[ilvl]);
+                                    #endif
+                                    
+                                }
+
+                                if (ilvl < maxLvl - 1)     /*then reduce before factorization*/
+                                {
+                                    if(superlu_acc_offload){
+                                        int tag = 700;
+
+                                        #ifdef Torch_stat
+                                        time_exchange = SuperLU_timer_();
+                                        #endif
+
+                                        // myNodeCount
+                                        int_t* myNodeCount_temp = INT_T_ALLOC(maxLvl);
+                                        MPI_Recv(myNodeCount_temp, maxLvl, mpi_int_t, i, tag++, grid3d->zscp.comm, &status);
+
+                                        // treePerm
+                                        int_t** treePerm_temp = getTreePermFr( myTreeIdxs_temp, sForests_temp, grid3d);
+
+                                        // myGrid
+                                        MPI_Recv(&(LUstruct_temp.Llu->isEmpty), 1, MPI_INT, i, tag++, grid3d->zscp.comm, &status);
+
+                                        // iam
+                                        MPI_Recv(&(LUstruct_temp.Llu->tempiam), 1, MPI_INT, i, tag++, grid3d->zscp.comm, &status);
+
+                                        #ifdef Torch_stat
+                                        SCT->tExchange[ilvl] += (SuperLU_timer_() - time_exchange);
+                                        #endif
+
+                                        dreduceAllAncestors3d_GPU(
+                                            ilvl, myNodeCount_temp, treePerm_temp, LUvsb,
+                                            &LUstruct_temp, grid3d, sluGPU_temp, d2Hred_temp, &factStat_temp, HyP_temp,
+                                            SCT );
+
+                                        LUstruct_temp.Llu->isEmpty = 2;
+
+                                        if (maxLvl == 2) {
+                                            dfree_LUstruct_gpu(sluGPU_temp->A_gpu);
+                                        }
+                                        else
+                                        {
+                                            dfree_LUstruct_gpu_Buffer(sluGPU_temp->A_gpu);
+                                        }
+
+                                        SUPERLU_FREE(myNodeCount_temp);
+                                        SUPERLU_FREE(myTreeIdxs_temp);
+                                    }
+                                }                       
+               
+                                #ifdef Torch_stat
+                                time_exchange = SuperLU_timer_();
+                                #endif
+
+                                // for (int j = 0; j < grid3d->npcol * grid3d->nprow; j++)
+                                // {
+                                //     MPI_Barrier(grid->comm);
+                                //     if (j == grid->iam)
+                                //     {
+                                        // exchange LUStruct
+                                        dBcastRecv_LUstruct1_harddisk(&LUstruct_temp, 0, i, grid3d, nsupers);
+                                //     }
+                                // }                                
+                                
+                                MPI_Barrier(grid->comm);
+                                #ifdef Use_harddisk
+                                save_LUstruct_harddisk2(n, grid3d, &LUstruct_temp, nsupers); 
+                                restore_LUstruct_harddisk(Llu, LUstruct_temp.Llu, grid3d, nsupers, grid->iam);
+                                LUstruct_temp.Llu->isSave = TRUE;
+                                #endif
+
+                                freePackLUInfo(&packLUInfo_temp);
+                                freeFactStat(&factStat_temp);
+                                freeFactNodelists(&fNlists_temp);
+
+                                #ifdef Torch_stat
+                                SCT->tExchange[ilvl] += (SuperLU_timer_() - time_exchange);
+
+                                printf("%d: tExchange[%d] = %e s\n", grid3d->iam, ilvl, SCT->tExchange[ilvl]);
+                                #endif
+                            }
+
+                            Free_HyP(HyP_temp);
+                            
+                        }
+                        
+                        
+                    }
+                    
+                }
+                else
+                {
+                    if (grid3d->zscp.Iam == 0)
+                    {   
+                        if(superlu_acc_offload){
+
+                            #ifdef Use_harddisk
+                            LUstruct->Llu->save_iam = grid->iam;
+                            for (int j = 0; j < grid3d->npcol * grid3d->nprow; j++)
+                            {
+                                // LUstruct
+                                MPI_Barrier(grid->comm);
+                                if (j == grid->iam)
+                                {
+                                    load_LUstruct_harddisk(n, grid3d, LUstruct);
+                                }
+                            }
+                            LUstruct->Llu->isSave = FALSE;
+                            #endif
+                            
+                            #ifdef Torch_batch_init
+                            for (int j = 0; j < grid3d->npcol * grid3d->nprow; j++)
+                            {
+                                MPI_Barrier(grid->comm);
+                                if (j == grid->iam)
+                                {
+                                    /* Initialize GPU data structures */
+                                    dinitSluGPU3D_t(sluGPU, LUstruct, grid3d, perm_c_supno,
+                                                    n, buffer_size, bigu_size, ldt);
+                                }
+                            }
+
+                            MPI_Barrier(grid->comm);
+
+                            #else
+                            /* Initialize GPU data structures */
+                            dinitSluGPU3D_t(sluGPU, LUstruct, grid3d, perm_c_supno,
+                                            n, buffer_size, bigu_size, ldt);
+                            #endif
+
+                            HyP->first_u_block_acc = sluGPU->A_gpu->first_u_block_gpu;
+                            HyP->first_l_block_acc = sluGPU->A_gpu->first_l_block_gpu;
+                            HyP->nCudaStreams = sluGPU->nCudaStreams;
+                            sluGPU->A_gpu->isEmpty = 0;  
+                        }               
+                        
+                        /* if I participate in this level */
+                        if (!myZeroTrIdxs[ilvl])
+                        {
+                            
+                            //int_t tree = myTreeIdxs[ilvl];
+                            sForest_t* sforest = sForests[myTreeIdxs[ilvl]];  
+
+                            /* main loop over all the supernodes */
+                            if (sforest) /* 2D factorization at individual subtree */
+                            { 
+                                double tilvl = SuperLU_timer_();
+                                ddiagFactBufs_t** dFBufs = dinitDiagFactBufsArr(mxLeafNode, ldt, grid);
+                                dLUValSubBuf_t** LUvsbs = dLluBufInitArr( SUPERLU_MAX( numLA, grid3d->zscp.Np ), LUstruct);
+
+                                if(superlu_acc_offload){
+                                    
+                                    dsparseTreeFactor_ASYNC_GPU(
+                                        sforest,
+                                        comReqss, &scuBufs,  &packLUInfo,
+                                        msgss, LUvsbs, dFBufs,  &factStat, &fNlists,
+                                        &gEtreeInfo, options,  iperm_c_supno, ldt,
+                                        sluGPU,  d2Hred,  HyP, LUstruct, grid3d, stat,
+                                        thresh,  SCT, tag_ub, info);
+                                }
+                                
+                                else{
+                                    dsparseTreeFactor_ASYNC(sforest, comReqss,  &scuBufs, &packLUInfo,
+                                        msgss, LUvsbs, dFBufs, &factStat, &fNlists,
+                                        &gEtreeInfo, options, iperm_c_supno, ldt,
+                                        HyP, LUstruct, grid3d, stat,
+                                        thresh,  SCT, tag_ub, info );
+                                }
+
+                                dfreeDiagFactBufsArr(mxLeafNode, dFBufs);
+                                dLluBufFreeArr(numLA, LUvsbs);
+
+                                /*now reduce the updates*/
+                                SCT->tFactor3D[ilvl] = SuperLU_timer_() - tilvl;
+                                sForests[myTreeIdxs[ilvl]]->cost = SCT->tFactor3D[ilvl];
+
+                                #ifdef Torch_stat
+                                printf("%d: tFactor3D[%d] = %e s\n", grid3d->iam, ilvl, SCT->tFactor3D[ilvl]);
+                                #endif
+                            }
+                            
+                            if (ilvl < maxLvl - 1)     /*then reduce before factorization*/
+                            {
+                                if(superlu_acc_offload){
+                                    #ifdef Torch_stat
+                                    double time_reduceAllAncestors3d = SuperLU_timer_();
+                                    #endif
+
+                                    dreduceAllAncestors3d_GPU(
+                                        ilvl, myNodeCount, treePerm, LUvsb,
+                                        LUstruct, grid3d, sluGPU, d2Hred, &factStat, HyP,
+                                        SCT );
+
+                                    #ifdef Torch_stat
+                                    printf("%d: treduceAllAncestors3d[%d] = %e s\n", grid3d->iam, ilvl, SuperLU_timer_() - time_reduceAllAncestors3d);
+                                    #endif
+                                }                        
+
+                            }       
+
+                        } /*if (!myZeroTrIdxs[ilvl])  ... If I participate in this level*/
+                    }
+                }
+                
+                #if 0
+                if (i == grid3d->zscp.Iam)
+                {
+                    /* if I participate in this level */
+                    if (!myZeroTrIdxs[ilvl])
+                    {
+                        //int_t tree = myTreeIdxs[ilvl];
+                        sForest_t* sforest = sForests[myTreeIdxs[ilvl]];            
+
+                        /* main loop over all the supernodes */
+                        if (sforest) /* 2D factorization at individual subtree */
+                        {                
+                            double tilvl = SuperLU_timer_();
+
+                            if(superlu_acc_offload){
+                                
+                                if (ilvl == 0)
+                                {
+                                
+                                /* Initialize GPU data structures */
+                                    dinitSluGPU3D_t(sluGPU, LUstruct, grid3d, perm_c_supno,
+                                                    n, buffer_size, bigu_size, ldt);
+
+                                    HyP->first_u_block_acc = sluGPU->A_gpu->first_u_block_gpu;
+                                    HyP->first_l_block_acc = sluGPU->A_gpu->first_l_block_gpu;
+                                    HyP->nCudaStreams = sluGPU->nCudaStreams;
+                                }
+                                
+                                dsparseTreeFactor_ASYNC_GPU(
+                                    sforest,
+                                    comReqss, &scuBufs,  &packLUInfo,
+                                    msgss, LUvsbs, dFBufs,  &factStat, &fNlists,
+                                    &gEtreeInfo, options,  iperm_c_supno, ldt,
+                                    sluGPU,  d2Hred,  HyP, LUstruct, grid3d, stat,
+                                    thresh,  SCT, tag_ub, info);
+                            }
+                            
+                            else{
+                                dsparseTreeFactor_ASYNC(sforest, comReqss,  &scuBufs, &packLUInfo,
+                                    msgss, LUvsbs, dFBufs, &factStat, &fNlists,
+                                    &gEtreeInfo, options, iperm_c_supno, ldt,
+                                    HyP, LUstruct, grid3d, stat,
+                                    thresh,  SCT, tag_ub, info );
+                            }
+
+                            /*now reduce the updates*/
+                            SCT->tFactor3D[ilvl] = SuperLU_timer_() - tilvl;
+                            sForests[myTreeIdxs[ilvl]]->cost = SCT->tFactor3D[ilvl];
+                        }
+                        
+                        if (ilvl < maxLvl - 1)     /*then reduce before factorization*/
+                        {
+                            if(superlu_acc_offload){
+                                dreduceAllAncestors3d_GPU(
+                                    ilvl, myNodeCount, treePerm, LUvsb,
+                                    LUstruct, grid3d, sluGPU, d2Hred, &factStat, HyP,
+                                    SCT );
+                                
+                            }                        
+
+                        }       
+
+                    } /*if (!myZeroTrIdxs[ilvl])  ... If I participate in this level*/
+
+                }
+                #endif
+            }
+        }
+        else
+        {
+            if (grid3d->zscp.Iam)
+            {
+                /* if I participate in this level */
+                if (!myZeroTrIdxs[ilvl])
+                {
+                    if (ilvl < maxLvl - 1)     /*then reduce before factorization*/
+                    {
+                        if(superlu_acc_offload){
+                            sluGPU->A_gpu->isEmpty = 1;
+
+                            #ifdef Torch_stat
+                            double time_reduceAllAncestors3d = SuperLU_timer_();
+                            #endif
+
+                            dreduceAllAncestors3d_GPU(
+                                ilvl, myNodeCount, treePerm, LUvsb,
+                                LUstruct, grid3d, sluGPU, d2Hred, &factStat, HyP,
+                                SCT );
+
+                            #ifdef Torch_stat
+                            printf("%d: treduceAllAncestors3d[%d] = %e s\n", grid3d->iam, ilvl, SuperLU_timer_() - time_reduceAllAncestors3d);
+                            #endif
+                        }
+
+                    }  
+                }    
+            }
+            else
+            {
+                /* if I participate in this level */
+                if (!myZeroTrIdxs[ilvl])
+                {
+                    //int_t tree = myTreeIdxs[ilvl];
+                    sForest_t* sforest = sForests[myTreeIdxs[ilvl]];
+
+                    /* main loop over all the supernodes */
+                    if (sforest) /* 2D factorization at individual subtree */
+                    {                
+                        double tilvl = SuperLU_timer_();
+
+                        ddiagFactBufs_t** dFBufs = dinitDiagFactBufsArr(mxLeafNode, ldt, grid);
+                        dLUValSubBuf_t** LUvsbs = dLluBufInitArr( SUPERLU_MAX( numLA, grid3d->zscp.Np ), LUstruct);
+
+                        if(superlu_acc_offload){
+                            
+                            dsparseTreeFactor_ASYNC_GPU(
+                                sforest,
+                                comReqss, &scuBufs,  &packLUInfo,
+                                msgss, LUvsbs, dFBufs,  &factStat, &fNlists,
+                                &gEtreeInfo, options,  iperm_c_supno, ldt,
+                                sluGPU,  d2Hred,  HyP, LUstruct, grid3d, stat,
+                                thresh,  SCT, tag_ub, info);
+                        }
+                        
+                        else{
+                            dsparseTreeFactor_ASYNC(sforest, comReqss,  &scuBufs, &packLUInfo,
+                                msgss, LUvsbs, dFBufs, &factStat, &fNlists,
+                                &gEtreeInfo, options, iperm_c_supno, ldt,
+                                HyP, LUstruct, grid3d, stat,
+                                thresh,  SCT, tag_ub, info );
+                        }
+
+                        dfreeDiagFactBufsArr(mxLeafNode, dFBufs);
+                        dLluBufFreeArr(numLA, LUvsbs);
+
+                        /*now reduce the updates*/
+                        SCT->tFactor3D[ilvl] = SuperLU_timer_() - tilvl;
+                        sForests[myTreeIdxs[ilvl]]->cost = SCT->tFactor3D[ilvl];
+
+                        #ifdef Torch_stat
+                        printf("%d: tFactor3D[%d] = %e s\n", grid3d->iam, ilvl, SCT->tFactor3D[ilvl]);
+                        #endif
+                    }
+                    
+                    if (ilvl < maxLvl - 1)     /*then reduce before factorization*/
+                    {
+                        if(superlu_acc_offload){
+
+                            #ifdef Torch_stat
+                            double time_reduceAllAncestors3d = SuperLU_timer_();
+                            #endif
+
+                            dreduceAllAncestors3d_GPU(
+                                ilvl, myNodeCount, treePerm, LUvsb,
+                                LUstruct, grid3d, sluGPU, d2Hred, &factStat, HyP,
+                                SCT );
+
+                            #ifdef Torch_stat
+                            printf("%d: treduceAllAncestors3d[%d] = %e s\n", grid3d->iam, ilvl, SuperLU_timer_() - time_reduceAllAncestors3d);
+                            #endif
+                            
+                        }                        
+
+                    }       
+
+                } /*if (!myZeroTrIdxs[ilvl])  ... If I participate in this level*/
+            }
+            
+        }
+                
+
+        /* if I participate in this level */
+        if (!myZeroTrIdxs[ilvl])
+        {
+            if (ilvl < maxLvl - 1)     /*then reduce before factorization*/
+            {
+                #ifdef Torch_stat
+                double time_reduceAllAncestors3d = SuperLU_timer_();
+                #endif
+
+                if(superlu_acc_offload){
+
+                    dreduceAllAncestors3d(ilvl, myNodeCount, treePerm, 	                      LUvsb, LUstruct, grid3d, SCT );
+                }
+                else{
+
+                    dreduceAllAncestors3d(ilvl, myNodeCount, treePerm,
+                                        LUvsb, LUstruct, grid3d, SCT );
+                }
+
+                #ifdef Torch_stat
+                printf("%d: treduceAllAncestors3d[%d] = %e s\n", grid3d->iam, ilvl, SuperLU_timer_() - time_reduceAllAncestors3d);
+                #endif
 
             }
         }        

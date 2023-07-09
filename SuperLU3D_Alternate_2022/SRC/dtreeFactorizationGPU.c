@@ -332,8 +332,8 @@ int dsparseTreeFactor_ASYNC_GPU(
         SCT->pdgstrf2_timer += (SuperLU_timer_() - t1);
     } /* for all leaves ... */
 
-    //printf(".. SparseFactor_GPU: after leaves\n"); fflush(stdout);     
-
+    // printf("%d, .. SparseFactor_GPU: after leaves %e\n", grid->iam, SuperLU_timer_()); fflush(stdout);
+    
     #ifndef SuperLargeScale
 
     // int_t max_maxTopoLevel;
@@ -465,7 +465,7 @@ int dsparseTreeFactor_ASYNC_GPU(
         #endif 
         #endif
        
-        // printf("(%d) factor level %d, maxTopoLevel %d\n",grid3d->iam,topoLvl,maxTopoLevel); fflush(stdout);
+        // printf("(%d) factor level %d, maxTopoLevel %d, %e\n",grid3d->iam,topoLvl,maxTopoLevel, SuperLU_timer_()); fflush(stdout);
         
         /* code */
         int k_st = eTreeTopLims[topoLvl];
@@ -628,7 +628,7 @@ int dsparseTreeFactor_ASYNC_GPU(
         } /* for all nodes in this level */ 
         #endif 
         
-        // printf(".. SparseFactor_GPU: after diag factorization\n"); fflush(stdout);        
+        // printf("%d: .. SparseFactor_GPU: after diag factorization,%e\n", grid->iam, SuperLU_timer_()); fflush(stdout);        
 
         double t_apt = SuperLU_timer_(); /* Async Pipe Timer */
 
@@ -670,7 +670,7 @@ int dsparseTreeFactor_ASYNC_GPU(
             
         } /* end panel update */
 
-        //printf(".. after CPU panel updates. numLA %d\n", numLA); fflush(stdout);
+        // printf("%d: .. after CPU panel updates. numLA %d, %e\n", grid->iam, numLA, SuperLU_timer_()); fflush(stdout);
 
         #ifdef SuperLargeScale
         Llu->core_status = InCore;
@@ -807,7 +807,7 @@ int dsparseTreeFactor_ASYNC_GPU(
         } /* end for panels in look-ahead window */
         #endif
 
-        //printf(".. after CPU look-ahead updates\n"); fflush(stdout);
+        // printf("%d: .. after CPU look-ahead updates, %e\n", grid->iam, SuperLU_timer_()); fflush(stdout);
 
         // if (topoLvl) SCT->tAsyncPipeTail += SuperLU_timer_() - t_apt;
         SCT->tAsyncPipeTail += (SuperLU_timer_() - t_apt);
@@ -817,12 +817,12 @@ int dsparseTreeFactor_ASYNC_GPU(
         for (int k0 = k_st; k0 < k_end; ++k0)
         {
             
-            // printf("%d:%d,%d,%d\n",grid3d->iam,k0,k_st,k_end); fflush(stdout);
+            // printf("%d:%d,%d,%d,%e\n",grid3d->iam,k0,k_st,k_end,SuperLU_timer_()); fflush(stdout);
 
             int k = perm_c_supno[k0]; // direct computation no perm_c_supno
             int offset = k0 % numLA;
 
-            double tsch = SuperLU_timer_();
+            double tsch = SuperLU_timer_();            
 
 #if 0
             sWaitL(k, comReqss[offset], msgss[offset], grid, LUstruct, SCT);
@@ -843,7 +843,7 @@ int dsparseTreeFactor_ASYNC_GPU(
                                                          LUvsbs[offset], grid, LUstruct, HyP);
             // initializing D2H data transfer. D2H = Device To Host.
             int_t jj_cpu; /* limit between CPU and GPU */
-
+            
 #if 1
             if (superlu_acc_offload)
             {
@@ -892,7 +892,7 @@ int dsparseTreeFactor_ASYNC_GPU(
 #endif            
 
             scuStatUpdate(SuperSize(k), HyP, SCT, stat);
-
+            
             int_t offload_condition = HyP->offloadCondition;
             uPanelInfo_t *uPanelInfo = packLUInfo->uPanelInfo;
             lPanelInfo_t *lPanelInfo = packLUInfo->lPanelInfo;
@@ -945,7 +945,7 @@ int dsparseTreeFactor_ASYNC_GPU(
 
             SCT->lookaheadupdatetimer += (SuperLU_timer_() - t1);
 
-            //printf("... after look-ahead update, topoLvl %d\t maxTopoLevel %d\n", topoLvl, maxTopoLevel); fflush(stdout);
+            // printf("%d: ... after look-ahead update, topoLvl %d\t maxTopoLevel %d, %e\n", grid->iam, topoLvl, maxTopoLevel, SuperLU_timer_()); fflush(stdout);
 
             /* Reduce the L & U panels from GPU to CPU.       */
             #ifdef Torch
@@ -1013,7 +1013,7 @@ int dsparseTreeFactor_ASYNC_GPU(
                 } /* end if all children are done */                
             }     /* end if non-root */      
            
-            // printf("%d:Reduce the L & U panels from GPU to CPU.%d,%d,%d\n",grid3d->iam,k0,k_st,k_end); fflush(stdout);
+            // printf("%d:Reduce the L & U panels from GPU to CPU.%d,%d,%d,%e\n",grid3d->iam,k0,k_st,k_end, SuperLU_timer_()); fflush(stdout);
 
 #pragma omp parallel
             {
@@ -1089,7 +1089,7 @@ int dsparseTreeFactor_ASYNC_GPU(
 
             } /* end omp parallel region */
             
-            // printf("\n%d:Master thread performs Schur complement update on GPU,%d,%d,%d\n",grid3d->iam,k0,k_st,k_end); fflush(stdout);
+            // printf("\n%d:Master thread performs Schur complement update on GPU,%d,%d,%d,%e\n",grid3d->iam,k0,k_st,k_end,SuperLU_timer_()); fflush(stdout);
 
             //SCT->NetSchurUpTimer += SuperLU_timer_() - tsch;
 
@@ -1304,7 +1304,7 @@ int dsparseTreeFactor_ASYNC_GPU(
             } /* end for look-ahead window */
             #endif
             
-            // printf("\n.end for look-ahead window\n"); fflush(stdout);
+            // printf("\n%d: .end for look-ahead , %e\n", grid->iam, SuperLU_timer_()); fflush(stdout);
    
             if (topoLvl < maxTopoLevel - 1) /* not root */
             {
@@ -1502,7 +1502,7 @@ int dsparseTreeFactor_ASYNC_GPU(
                     
                 } /* end look-ahead */                    
 
-    //             // printf("%d:break1\n",grid3d->iam);
+    //             
     //             for (int i = 0; i < grid3d->npcol*grid3d->nprow; i++)
     //             {
     //                 MPI_Barrier(grid->comm);

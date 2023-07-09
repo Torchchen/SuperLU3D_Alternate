@@ -611,6 +611,15 @@ int_t dLPanelTrSolve( int_t k,   int_t* factored_L,
         
         
         #endif
+
+        #ifdef Use_harddisk
+        
+        if(Llu->isSave){
+            Llu->Lnzval_bc_ptr[lk] = load_Lnzval_bc_ptr_harddisk(lk,Llu,Llu->save_iam);
+            printf("%d use load_Lnzval_bc_ptr_harddisk() %d\n", grid->iam, Llu->isSave);
+        }    
+        
+        #endif
         
         double* lusup = Llu->Lnzval_bc_ptr[lk];
 
@@ -673,6 +682,19 @@ int_t dLPanelTrSolve( int_t k,   int_t* factored_L,
         }
         #endif
         #endif
+
+        #ifdef Use_harddisk
+        if(Llu->isSave){
+            if(Llu->Lnzval_bc_ptr_ilen[lk]){
+                if(set_iLnzval_bc_ptr_harddisk(lusup,lk,0,Llu->Lnzval_bc_ptr_ilen[lk],Llu,Llu->save_iam)){
+                    SUPERLU_FREE(lusup);
+                }
+                else{
+                    ABORT("failed in set_iLnzval_bc_ptr_txt() of dLPanelTrSolve(). \n");
+                }
+            }            
+        }
+        #endif
     }
 
     if (iam == pkk)
@@ -698,6 +720,14 @@ int_t dLPanelTrSolve( int_t k,   int_t* factored_L,
         #endif        
         
         #endif
+
+        #ifdef Use_harddisk
+
+        if(Llu->isSave){
+            Llu->Lnzval_bc_ptr[lk] = load_Lnzval_bc_ptr_harddisk(lk,Llu,Llu->save_iam);
+        }
+        #endif   
+
         double* lusup = Llu->Lnzval_bc_ptr[lk];
 
         int nsupr;
@@ -748,6 +778,19 @@ int_t dLPanelTrSolve( int_t k,   int_t* factored_L,
             }
         }
         #endif
+        #endif
+
+        #ifdef Use_harddisk
+        if(Llu->isSave){
+            if(Llu->Lnzval_bc_ptr_ilen[lk]){
+                if(set_iLnzval_bc_ptr_harddisk(lusup,lk,0,Llu->Lnzval_bc_ptr_ilen[lk],Llu,Llu->save_iam)){
+                    SUPERLU_FREE(lusup);
+                }
+                else{
+                    ABORT("failed in set_iLnzval_bc_ptr_txt() of dLPanelTrSolve(). \n");
+                }
+            }            
+        }
         #endif
     }
 
@@ -813,7 +856,7 @@ int_t dUPanelTrSolve( int_t k,
         #endif
 
         #else
-        if (!Llu->Unzval_br_ptr[lk])
+        if (!Llu->Unzval_br_ptr[lk] || !Llu->Unzval_br_ptr_ilen[lk])
             return 0;
         #endif
 
@@ -821,7 +864,7 @@ int_t dUPanelTrSolve( int_t k,
         int_t klst = FstBlockC (k + 1);
 
         int_t *usub = Llu->Ufstnz_br_ptr[lk];  /* index[] of block row U(k,:) */        
-
+        
         #ifdef Torch    
         int_t iPart=0;    
         #ifdef SuperLargeScale        
@@ -834,19 +877,26 @@ int_t dUPanelTrSolve( int_t k,
         if(GetVectorStatus(Llu->isUsed_Unzval_br_ptr[lk][iPart]) == Unused){
             SetVectorStatus(Llu->isUsed_Unzval_br_ptr[lk][iPart], Used);
         }
-        #endif       
+        #endif
         
         #endif
+
+        #ifdef Use_harddisk        
+
+        if(Llu->isSave){
+            Llu->Unzval_br_ptr[lk] = load_Unzval_br_ptr_harddisk(lk,Llu,Llu->save_iam);            
+        }
+        #endif   
+
         double *uval = Llu->Unzval_br_ptr[lk];
 
         int_t nb = usub[0];
-
         // int_t nsupr = Lsub_buf[1];   /* LDA of lusup[] */
         double *lusup = BlockLFactor;
-
+        
         /* Loop through all the row blocks. to get the iukp and rukp*/
         Trs2_InitUblock_info(klst, nb, Ublock_info, usub, Glu_persist, stat );
-
+        
         /* Loop through all the row blocks. */
         // #pragma omp for schedule(dynamic,2) nowait
         for (int_t b = 0; b < nb; ++b)
@@ -863,7 +913,7 @@ int_t dUPanelTrSolve( int_t k,
 				       usub, uval, tempv, nsupc, nsupc, lusup, Glu_persist);
             }
         }
-
+        
         #ifdef Torch
         #ifdef SuperLargeScale
         if(Llu->isSave){
@@ -887,6 +937,20 @@ int_t dUPanelTrSolve( int_t k,
         }
         #endif
         #endif
+
+        #ifdef Use_harddisk
+        if(Llu->isSave){
+            if(Llu->Unzval_br_ptr_ilen[lk]){
+                if(set_iUnzval_br_ptr_harddisk(uval,lk,0,Llu->Unzval_br_ptr_ilen[lk],Llu,Llu->save_iam)){
+                    SUPERLU_FREE(uval);
+                }
+                else{
+                    ABORT("failed in set_iUnzval_br_ptr_txt() of dUPanelTrSolve(). \n");
+                }
+            }            
+        }
+        #endif
+        
     }
 
     /*factor the U panel*/
@@ -930,7 +994,7 @@ int_t dUPanelTrSolve( int_t k,
         if (Llu->Unzval_br_ptr[lk])
         #endif
         #else
-        if (Llu->Unzval_br_ptr[lk])
+        if (Llu->Unzval_br_ptr[lk] && Llu->Unzval_br_ptr_ilen[lk])
         #endif
         {
             /* Initialization. */

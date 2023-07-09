@@ -1019,10 +1019,12 @@ extern float   smach_dist(char *);
 extern double  dmach_dist(char *);
 extern void    *superlu_malloc_dist (size_t);
 
-// #ifdef SuperLargeScale
-// extern int    superlu_free_dist (void*);
-// #endif
+#define Use_harddisk
+#ifdef Use_harddisk
+extern int    superlu_free_dist (void*);
+#else
 extern void    superlu_free_dist (void*);
+#endif
 
 extern int_t   *intMalloc_dist (int_t);
 extern int_t   *intCalloc_dist (int_t);

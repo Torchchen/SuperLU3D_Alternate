@@ -429,6 +429,15 @@ void Local_Dgstrf2(superlu_dist_options_t *options, int_t k, double thresh,
     #endif
     
     #endif
+
+    #ifdef Use_harddisk   
+
+    if(Llu->isSave){        
+        Llu->Lnzval_bc_ptr[lk] = load_Lnzval_bc_ptr_harddisk(lk,Llu,Llu->save_iam);
+    }    
+    
+    #endif
+
     double *lusup = Llu->Lnzval_bc_ptr[lk];
 
     int nsupc = SuperSize (k);
@@ -537,6 +546,21 @@ void Local_Dgstrf2(superlu_dist_options_t *options, int_t k, double thresh,
         }
     }
     #endif
+    #endif
+
+    #ifdef Use_harddisk
+    if(Llu->isSave){
+        if(Llu->Lnzval_bc_ptr_ilen[lk]){
+            if(set_iLnzval_bc_ptr_harddisk(lusup,lk,0,Llu->Lnzval_bc_ptr_ilen[lk],Llu,Llu->save_iam)){
+                if(SUPERLU_FREE(lusup)){
+                    ABORT("failed in set_iLnzval_bc_ptr_txt() of Local_Dgstrf2(). \n");
+                }                
+            }
+            else{
+                ABORT("failed in set_iLnzval_bc_ptr_txt() of Local_Dgstrf2(). \n");
+            }
+        }        
+    }
     #endif
 }
 

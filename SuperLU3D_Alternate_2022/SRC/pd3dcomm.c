@@ -65,7 +65,7 @@ int_t dAllocLlu(int_t nsupers, dLUstruct_t * LUstruct, gridinfo3d_t* grid3d)
 		isUsed_Lnzval_bc_ptr[i]=intCalloc_dist(nPart+1);
 	}
 	int_t *Lnzval_bc_ptr_ilen =intCalloc_dist(nbc);
-	#ifdef SuperLargeScale
+	#ifdef Use_harddisk
 	
 	fpos_t **Lnzval_bc_ptr_fileposition=(fpos_t **)malloc(nbc * sizeof(fpos_t*));
 	for (i = 0; i < nbc ; ++i)
@@ -99,7 +99,7 @@ int_t dAllocLlu(int_t nsupers, dLUstruct_t * LUstruct, gridinfo3d_t* grid3d)
 		isUsed_Unzval_br_ptr[i]=intCalloc_dist(nPart+1);
 	}
 	int_t *Unzval_br_ptr_ilen =intCalloc_dist(nbr);
-	#ifdef SuperLargeScale
+	#ifdef Use_harddisk
 	
 	fpos_t **Unzval_br_ptr_fileposition = (fpos_t**)malloc(nbr * sizeof(fpos_t*));
 	for (i = 0; i < nbr ; ++i)
@@ -145,7 +145,7 @@ int_t dAllocLlu(int_t nsupers, dLUstruct_t * LUstruct, gridinfo3d_t* grid3d)
 	Llu->isUsed_Unzval_br_ptr=isUsed_Unzval_br_ptr;
 	Llu->Lnzval_bc_ptr_ilen=Lnzval_bc_ptr_ilen;
 	Llu->Unzval_br_ptr_ilen=Unzval_br_ptr_ilen;
-	#ifdef SuperLargeScale	
+	#ifdef Use_harddisk	
 	Llu->Lnzval_bc_ptr_fileposition=Lnzval_bc_ptr_fileposition;	
 	Llu->Unzval_br_ptr_fileposition=Unzval_br_ptr_fileposition;
 	#endif
@@ -256,9 +256,9 @@ int_t dzSendLPanel(int_t k, int_t receiver,
 	    lsub = Lrowind_bc_ptr[lk];	
 
 		#ifdef Torch
-		#ifdef SuperLargeScale
+		#ifdef Use_harddisk
 		if(Llu->isSave){
-			lnzval = load_Lnzval_bc_ptr(lk,Llu);
+			lnzval = load_Lnzval_bc_ptr_harddisk(lk,Llu,Llu->save_iam);
 		}
 		else{
 			lnzval = Lnzval_bc_ptr[lk];
@@ -283,7 +283,7 @@ int_t dzSendLPanel(int_t k, int_t receiver,
 		}
 
 		#ifdef Torch		
-		#ifdef SuperLargeScale
+		#ifdef Use_harddisk
 		if(Llu->isSave && lnzval && lsub){
 			if(SUPERLU_FREE(lnzval)){
 				ABORT("failed in dzSendLPanel(). \n");
@@ -322,9 +322,9 @@ int_t dzRecvLPanel(int_t k, int_t sender, double alpha, double beta,
 	    lsub = Lrowind_bc_ptr[lk];
 
 		#ifdef Torch
-		#ifdef SuperLargeScale
+		#ifdef Use_harddisk
 		if(Llu->isSave){
-			lnzval = load_Lnzval_bc_ptr(lk,Llu);
+			lnzval = load_Lnzval_bc_ptr_harddisk(lk,Llu,Llu->save_iam);
 		}
 		else{
 			lnzval = Lnzval_bc_ptr[lk];
@@ -353,9 +353,9 @@ int_t dzRecvLPanel(int_t k, int_t sender, double alpha, double beta,
 		}
 
 		#ifdef Torch
-		#ifdef SuperLargeScale
+		#ifdef Use_harddisk
 		if(Llu->isSave && lnzval && lsub){
-			if(set_iLnzval_bc_ptr_txt(lnzval,lk,0,Llu->Lnzval_bc_ptr_ilen[lk],Llu)){
+			if(set_iLnzval_bc_ptr_harddisk(lnzval,lk,0,Llu->Lnzval_bc_ptr_ilen[lk],Llu,Llu->save_iam)){
 				if(SUPERLU_FREE(lnzval)){
 					ABORT("failed in set_iLnzval_bc_ptr_txt() of dzRecvLPanel(). \n");
 				}				
@@ -390,9 +390,9 @@ int_t dzSendUPanel(int_t k, int_t receiver,
 	    usub = Ufstnz_br_ptr[lk];
 
 		#ifdef Torch
-		#ifdef SuperLargeScale
+		#ifdef Use_harddisk
 		if(Llu->isSave){
-			unzval = load_Unzval_br_ptr(lk,Llu);
+			unzval = load_Unzval_br_ptr_harddisk(lk,Llu,Llu->save_iam);
 		}
 		else{
 			unzval = Unzval_br_ptr[lk];
@@ -444,7 +444,7 @@ int_t dzSendUPanel(int_t k, int_t receiver,
 		}
 
 		#ifdef Torch
-		#ifdef SuperLargeScale
+		#ifdef Use_harddisk
 		if(Llu->isSave && unzval){
 			if(SUPERLU_FREE(unzval)){
 				ABORT("failed in dzSendUPanel(). \n");
@@ -480,9 +480,9 @@ int_t dzRecvUPanel(int_t k, int_t sender, double alpha, double beta,
 	    usub = Ufstnz_br_ptr[lk];
 
 		#ifdef Torch
-		#ifdef SuperLargeScale
+		#ifdef Use_harddisk
 		if(Llu->isSave){
-			unzval = load_Unzval_br_ptr(lk,Llu);
+			unzval = load_Unzval_br_ptr_harddisk(lk,Llu,Llu->save_iam);
 		}
 		else{
 			unzval = Unzval_br_ptr[lk];
@@ -539,9 +539,9 @@ int_t dzRecvUPanel(int_t k, int_t sender, double alpha, double beta,
 		}
 
 		#ifdef Torch
-		#ifdef SuperLargeScale
+		#ifdef Use_harddisk
 		if(Llu->isSave && unzval && usub){
-			if(set_iUnzval_br_ptr_txt(unzval,lk,0,Llu->Unzval_br_ptr_ilen[lk],Llu)){
+			if(set_iUnzval_br_ptr_harddisk(unzval,lk,0,Llu->Unzval_br_ptr_ilen[lk],Llu,Llu->save_iam)){
 				if(SUPERLU_FREE(unzval)){
 					ABORT("failed in set_iUnzval_br_ptr_txt() of dzRecvUPanel(). \n");
 				}
